@@ -31,7 +31,7 @@ export default function RightSidebar({
   proclamas: Proclama[];
   totalCount: number;
 }) {
-  const { tr, lang } = useLanguage();
+  const { lang } = useLanguage();
 
   const top3 = [...proclamas].sort((a, b) => b.monto - a.monto).slice(0, 3);
   const medals = ["🥇", "🥈", "🥉"];

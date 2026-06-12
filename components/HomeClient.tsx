@@ -89,7 +89,7 @@ export default function HomeClient({
     }
     setPage(1);
     fetchPage(1, true);
-  }, [categoria, debouncedSearch, sort]);
+  }, [categoria, debouncedSearch, sort, fetchPage]);
 
   // Infinite scroll via IntersectionObserver
   useEffect(() => {
