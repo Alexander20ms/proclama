@@ -1,174 +1,264 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProclamaCard, { type Proclama } from "./ProclamaCard";
-import Rankings from "./Rankings";
+import LeftSidebar from "./LeftSidebar";
+import RightSidebar from "./RightSidebar";
 
 type SortKey = "monto" | "fecha" | "reacciones";
+type CategoriaItem = { nombre: string; emoji: string };
 
-function totalReacciones(r: Record<string, number> | null): number {
-  if (!r) return 0;
-  return Object.values(r).reduce((a, b) => a + b, 0);
-}
+type Props = {
+  initialProclamaas: Proclama[];
+  totalCount: number;
+  hasMore: boolean;
+  categorias: CategoriaItem[];
+  totalReacciones: number;
+};
 
 export default function HomeClient({
-  proclamas,
+  initialProclamaas,
+  totalCount,
+  hasMore: initialHasMore,
   categorias,
-}: {
-  proclamas: Proclama[];
-  categorias: string[];
-}) {
-  const { tr, lang, setLang, toggleTheme, theme } = useLanguage();
+  totalReacciones,
+}: Props) {
+  const { tr } = useLanguage();
 
+  const [proclamas, setProclamaas] = useState<Proclama[]>(initialProclamaas);
+  const [newIds, setNewIds] = useState<Set<string>>(new Set());
+  const [page, setPage] = useState(2);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [loading, setLoading] = useState(false);
+
+  const [categoria, setCategoria] = useState("all");
   const [search, setSearch] = useState("");
-  const [catFilter, setCatFilter] = useState("all");
   const [sort, setSort] = useState<SortKey>("monto");
 
-  const filtered = useMemo(() => {
-    let list = [...proclamas];
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter(
-        (p) =>
-          p.texto.toLowerCase().includes(q) ||
-          p.autor.toLowerCase().includes(q)
-      );
+  // Debounce search
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => setDebouncedSearch(search), 400);
+    return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
+  }, [search]);
+
+  const fetchPage = useCallback(
+    async (p: number, reset = false) => {
+      setLoading(true);
+      const params = new URLSearchParams({ page: String(p), limit: "10", sort });
+      if (categoria !== "all") params.set("categoria", categoria);
+      if (debouncedSearch) params.set("q", debouncedSearch);
+
+      try {
+        const res = await fetch(`/api/proclamas?${params}`);
+        const data = await res.json();
+        const newProclamaas: Proclama[] = data.proclamas ?? [];
+
+        if (reset) {
+          setProclamaas(newProclamaas);
+          setNewIds(new Set());
+        } else {
+          const ids = new Set(newProclamaas.map((p: Proclama) => p.id));
+          setNewIds(ids);
+          setProclamaas((prev) => [...prev, ...newProclamaas]);
+          // Clear animation flag after 600ms
+          setTimeout(() => setNewIds(new Set()), 600);
+        }
+
+        setPage(p + 1);
+        setHasMore(data.hasMore ?? false);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [categoria, debouncedSearch, sort]
+  );
+
+  // Reset on filter change
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
+    setPage(1);
+    fetchPage(1, true);
+  }, [categoria, debouncedSearch, sort]);
 
-    if (catFilter !== "all") {
-      list = list.filter((p) => p.categoria === catFilter);
-    }
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          fetchPage(page);
+        }
+      },
+      { threshold: 0.1, rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loading, page, fetchPage]);
 
-    list.sort((a, b) => {
-      if (sort === "monto") return b.monto - a.monto;
-      if (sort === "fecha")
-        return (
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-      if (sort === "reacciones")
-        return totalReacciones(b.reacciones) - totalReacciones(a.reacciones);
-      return 0;
-    });
-
-    return list;
-  }, [proclamas, search, catFilter, sort]);
+  const SORT_OPTS: { key: SortKey; label: string }[] = [
+    { key: "monto", label: tr("sortMonto") },
+    { key: "fecha", label: tr("sortFecha") },
+    { key: "reacciones", label: tr("sortReacciones") },
+  ];
 
   return (
     <div className="min-h-screen bg-bg">
-      {/* Header */}
-      <header className="border-b border-line sticky top-0 bg-bg/95 backdrop-blur z-40">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <span className="text-2xl font-extrabold text-foreground tracking-tight">
-              Proclama<span className="text-accent">.</span>
-            </span>
-            <p className="text-muted text-xs mt-0.5 hidden sm:block">
-              {tr("tagline")}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              className="text-muted hover:text-foreground text-base border border-line px-2.5 py-1.5 rounded-lg transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? tr("themeToggleDark") : tr("themeToggleLight")}
-            </button>
-            <button
-              onClick={() => setLang(lang === "es" ? "en" : "es")}
-              className="text-muted hover:text-foreground text-xs font-mono border border-line px-2.5 py-1.5 rounded-lg transition-colors"
-            >
-              {tr("langToggle")}
-            </button>
-            <Link
-              href="/nueva"
-              className="bg-accent text-white font-semibold px-4 py-2 rounded-xl hover:bg-blue-500 transition-colors text-sm whitespace-nowrap"
-            >
-              {tr("publishBtn")}
-            </Link>
-          </div>
+      {/* Mobile header */}
+      <header className="md:hidden sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-line">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <span className="text-xl font-extrabold text-foreground">
+            Proclama<span className="text-accent">.</span>
+          </span>
+          <Link
+            href="/nueva"
+            className="bg-accent text-white font-bold px-4 py-1.5 rounded-xl text-sm"
+          >
+            {tr("publishBtn")}
+          </Link>
         </div>
-      </header>
-
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        {/* Rankings */}
-        {proclamas.length >= 1 && <Rankings proclamas={proclamas} />}
-
-        {/* Search + Filter + Sort */}
-        <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        {/* Mobile search */}
+        <div className="px-4 pb-3">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={tr("searchPlaceholder")}
-            className="flex-1 bg-surface border border-line rounded-xl px-4 py-2.5 text-foreground placeholder-muted text-sm focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+            className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-sm text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent"
           />
-          <select
-            value={catFilter}
-            onChange={(e) => setCatFilter(e.target.value)}
-            className="bg-surface border border-line rounded-xl px-3 py-2.5 text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-accent cursor-pointer"
-          >
-            <option value="all">{tr("filterAll")}</option>
-            {categorias.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
-            className="bg-surface border border-line rounded-xl px-3 py-2.5 text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-accent cursor-pointer"
-          >
-            <option value="monto">{tr("sortMonto")}</option>
-            <option value="fecha">{tr("sortFecha")}</option>
-            <option value="reacciones">{tr("sortReacciones")}</option>
-          </select>
         </div>
-
-        {/* Muro */}
-        {proclamas.length > 0 ? (
-          <>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-muted text-sm">
-                {filtered.length} {tr("muroCount")}
-              </p>
-            </div>
-            {filtered.length > 0 ? (
-              <div className="space-y-3">
-                {filtered.map((p) => (
-                  <ProclamaCard key={p.id} proclama={p} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16 text-muted">
-                Sin resultados para &ldquo;{search}&rdquo;
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="text-center py-28">
-            <p className="text-5xl mb-5">📣</p>
-            <h2 className="text-2xl font-bold text-foreground mb-2">
-              {tr("muroEmpty")}
-            </h2>
-            <p className="text-muted mb-8 text-base">{tr("muroEmptyDesc")}</p>
-            <Link
-              href="/nueva"
-              className="bg-accent text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-500 transition-colors inline-block"
+        {/* Mobile category filter */}
+        <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide">
+          <button
+            onClick={() => setCategoria("all")}
+            className={`shrink-0 text-xs font-semibold px-3 py-1 rounded-full transition-colors ${
+              categoria === "all"
+                ? "bg-accent text-white"
+                : "bg-line text-muted"
+            }`}
+          >
+            Todas
+          </button>
+          {categorias.map((c) => (
+            <button
+              key={c.nombre}
+              onClick={() => setCategoria(c.nombre)}
+              className={`shrink-0 text-xs font-semibold px-3 py-1 rounded-full transition-colors ${
+                categoria === c.nombre
+                  ? "bg-accent text-white"
+                  : "bg-line text-muted"
+              }`}
             >
-              {tr("muroEmptyBtn")}
-            </Link>
-          </div>
-        )}
-      </main>
+              {c.emoji} {c.nombre}
+            </button>
+          ))}
+        </div>
+      </header>
 
-      <footer className="text-center py-8 text-muted text-xs border-t border-line mt-8">
-        {tr("footer")}
-      </footer>
+      {/* 3-column layout */}
+      <div className="max-w-[1200px] mx-auto flex gap-0 md:gap-8 md:px-6">
+        {/* Left sidebar — desktop only */}
+        <aside className="hidden md:block w-[240px] shrink-0">
+          <div className="sticky top-0 max-h-screen overflow-y-auto">
+            <LeftSidebar
+              categorias={categorias}
+              totalProclamaas={totalCount}
+              totalReacciones={totalReacciones}
+              selectedCategoria={categoria}
+              onCategoriaChange={setCategoria}
+              search={search}
+              onSearchChange={setSearch}
+            />
+          </div>
+        </aside>
+
+        {/* Center feed */}
+        <main className="flex-1 min-w-0 max-w-[600px] border-x border-line">
+          {/* Sort tabs */}
+          <div className="sticky top-0 z-30 bg-bg/95 backdrop-blur border-b border-line">
+            <div className="flex">
+              {SORT_OPTS.map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => setSort(opt.key)}
+                  className={`flex-1 py-3 text-xs font-semibold transition-colors border-b-2 ${
+                    sort === opt.key
+                      ? "border-accent text-accent"
+                      : "border-transparent text-muted hover:text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Feed */}
+          {proclamas.length === 0 && !loading ? (
+            <div className="text-center py-28 px-4">
+              <p className="text-5xl mb-5">📣</p>
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                {debouncedSearch || categoria !== "all"
+                  ? "Sin resultados"
+                  : tr("muroEmpty")}
+              </h2>
+              {!debouncedSearch && categoria === "all" && (
+                <Link
+                  href="/nueva"
+                  className="mt-6 inline-block bg-accent text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-500 transition-colors"
+                >
+                  {tr("muroEmptyBtn")}
+                </Link>
+              )}
+            </div>
+          ) : (
+            <>
+              {proclamas.map((p) => (
+                <ProclamaCard
+                  key={p.id}
+                  proclama={p}
+                  isNew={newIds.has(p.id)}
+                />
+              ))}
+
+              {/* Sentinel for infinite scroll */}
+              <div ref={sentinelRef} className="h-4" />
+
+              {/* Loading spinner */}
+              {loading && (
+                <div className="flex justify-center py-6">
+                  <div className="w-6 h-6 border-2 border-line border-t-accent rounded-full animate-spin" />
+                </div>
+              )}
+
+              {/* End of feed */}
+              {!hasMore && proclamas.length > 0 && (
+                <p className="text-center text-muted text-xs py-8">
+                  — {tr("footer")} —
+                </p>
+              )}
+            </>
+          )}
+        </main>
+
+        {/* Right sidebar — large screens only */}
+        <aside className="hidden lg:block w-[280px] shrink-0">
+          <div className="sticky top-0 max-h-screen overflow-y-auto border-l border-line">
+            <RightSidebar proclamas={proclamas} totalCount={totalCount} />
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

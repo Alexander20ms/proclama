@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ProclamaPageClient from "@/components/ProclamaPageClient";
 import type { Proclama } from "@/components/ProclamaCard";
+import type { Respuesta } from "@/components/RespuestaThread";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,15 +22,25 @@ async function getProclama(id: string): Promise<Proclama | null> {
   return (data as Proclama) ?? null;
 }
 
+async function getRespuestas(proclamaId: string): Promise<Respuesta[]> {
+  const { data, error } = await supabase
+    .from("respuestas")
+    .select("id, texto, autor, monto, created_at")
+    .eq("proclama_id", proclamaId)
+    .eq("publicada", true)
+    .order("created_at", { ascending: true });
+
+  if (error) return [];
+  return (data as Respuesta[]) ?? [];
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: { id: string };
 }): Promise<Metadata> {
   const proclama = await getProclama(params.id);
-  if (!proclama) {
-    return { title: "Proclama no encontrada" };
-  }
+  if (!proclama) return { title: "Proclama no encontrada" };
 
   const siteUrl = process.env.NEXT_PUBLIC_URL ?? "https://proclama.app";
   const ogImageUrl = `${siteUrl}/api/og?id=${proclama.id}`;
@@ -42,14 +53,7 @@ export async function generateMetadata({
       title: titulo,
       description: proclama.texto,
       siteName: "Proclama",
-      images: [
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          alt: titulo,
-        },
-      ],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: titulo }],
     },
     twitter: {
       card: "summary_large_image",
@@ -65,7 +69,12 @@ export default async function ProclamaPage({
 }: {
   params: { id: string };
 }) {
-  const proclama = await getProclama(params.id);
+  const [proclama, respuestas] = await Promise.all([
+    getProclama(params.id),
+    getRespuestas(params.id),
+  ]);
+
   if (!proclama) notFound();
-  return <ProclamaPageClient proclama={proclama} />;
+
+  return <ProclamaPageClient proclama={proclama} initialRespuestas={respuestas} />;
 }

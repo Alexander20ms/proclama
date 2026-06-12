@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import ReactionBar from "./ReactionBar";
-import ApoyoModal from "./ApoyoModal";
+import RespuestaThread from "./RespuestaThread";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export type Proclama = {
@@ -18,9 +18,32 @@ export type Proclama = {
   monto_total: number;
 };
 
-export default function ProclamaCard({ proclama }: { proclama: Proclama }) {
+const COLORS = [
+  "bg-blue-600", "bg-purple-600", "bg-green-600",
+  "bg-orange-600", "bg-red-600", "bg-pink-600",
+];
+
+function Avatar({ name }: { name: string }) {
+  const initial = name.trim()[0]?.toUpperCase() ?? "?";
+  const color = COLORS[name.charCodeAt(0) % COLORS.length];
+  return (
+    <div
+      className={`w-10 h-10 rounded-full ${color} flex items-center justify-center text-white font-bold text-sm shrink-0`}
+    >
+      {initial}
+    </div>
+  );
+}
+
+export default function ProclamaCard({
+  proclama,
+  isNew = false,
+}: {
+  proclama: Proclama;
+  isNew?: boolean;
+}) {
   const { lang, tr } = useLanguage();
-  const [showApoyo, setShowApoyo] = useState(false);
+  const [threadOpen, setThreadOpen] = useState(false);
 
   const monto = (proclama.monto / 100).toLocaleString("en-US", {
     style: "currency",
@@ -30,65 +53,82 @@ export default function ProclamaCard({ proclama }: { proclama: Proclama }) {
 
   const fecha = new Date(proclama.created_at).toLocaleDateString(
     lang === "es" ? "es-ES" : "en-US",
-    { year: "numeric", month: "short", day: "numeric" }
+    { month: "short", day: "numeric" }
   );
 
   return (
-    <>
-      <div className="bg-surface border border-line rounded-2xl px-6 py-5 hover:border-hover transition-colors">
-        <Link href={`/p/${proclama.id}`} className="block group">
-          <p className="text-foreground text-lg font-medium leading-relaxed mb-4 group-hover:text-accent transition-colors">
-            &ldquo;{proclama.texto}&rdquo;
-          </p>
-        </Link>
-
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="text-muted text-sm">— {proclama.autor}</span>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-muted font-medium px-2.5 py-1 rounded-full bg-line">
-              {proclama.categoria}
-            </span>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-accent/15 text-accent">
-              {monto}
-            </span>
-            <span className="text-xs text-muted">{fecha}</span>
-          </div>
+    <article
+      className={`px-4 py-4 border-b border-line hover:bg-surface transition-colors cursor-default ${
+        isNew ? "card-enter" : ""
+      }`}
+    >
+      <div className="flex gap-3">
+        {/* Avatar */}
+        <div className="shrink-0 mt-0.5">
+          <Avatar name={proclama.autor} />
         </div>
 
-        {/* Creyentes */}
-        {(proclama.apoyos > 0 || proclama.monto_total > 0) && (
-          <div className="flex items-center gap-3 mt-3 text-xs text-muted">
-            <span>
-              🤝 {proclama.apoyos} {tr("creyentesCount")}
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {/* Header row */}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
+            <span className="text-foreground font-bold text-sm leading-none">
+              {proclama.autor}
             </span>
-            {proclama.monto_total > 0 && (
-              <span>
-                ${proclama.monto_total.toFixed(2)} {tr("creyentesTotal")}
+            <span className="text-muted text-xs">{fecha}</span>
+            <div className="ml-auto flex items-center gap-1.5">
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent">
+                {monto}
               </span>
-            )}
+              <span className="text-xs text-muted font-medium px-2 py-0.5 rounded-full bg-line">
+                {proclama.categoria}
+              </span>
+            </div>
           </div>
-        )}
 
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <ReactionBar
-            proclamaId={proclama.id}
-            initialReacciones={proclama.reacciones ?? {}}
-          />
-          <button
-            onClick={() => setShowApoyo(true)}
-            className="text-xs font-semibold text-accent border border-accent/30 px-3 py-1.5 rounded-full hover:bg-accent/10 transition-colors whitespace-nowrap"
-          >
-            {tr("apoyoBtn")}
-          </button>
+          {/* Texto */}
+          <Link href={`/p/${proclama.id}`} className="block group">
+            <p className="text-foreground text-[18px] leading-relaxed font-medium group-hover:text-accent transition-colors">
+              &ldquo;{proclama.texto}&rdquo;
+            </p>
+          </Link>
+
+          {/* Footer: reactions + reply button */}
+          <div className="flex items-center justify-between mt-3">
+            <ReactionBar
+              proclamaId={proclama.id}
+              initialReacciones={proclama.reacciones ?? {}}
+            />
+            <button
+              onClick={() => setThreadOpen((v) => !v)}
+              className={`flex items-center gap-1.5 text-sm px-2 py-1 rounded-lg transition-colors ${
+                threadOpen
+                  ? "text-accent"
+                  : "text-muted hover:text-foreground hover:bg-hover"
+              }`}
+              title={tr("apoyoTitle")}
+            >
+              {/* Comment bubble icon */}
+              <svg
+                viewBox="0 0 24 24"
+                className="w-[18px] h-[18px] fill-none stroke-current stroke-2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
+                />
+              </svg>
+              <span className="text-xs font-semibold">Responder</span>
+            </button>
+          </div>
+
+          {/* Thread (expandable) */}
+          {threadOpen && (
+            <RespuestaThread proclamaId={proclama.id} />
+          )}
         </div>
       </div>
-
-      {showApoyo && (
-        <ApoyoModal
-          proclama={proclama}
-          onClose={() => setShowApoyo(false)}
-        />
-      )}
-    </>
+    </article>
   );
 }
