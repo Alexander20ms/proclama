@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -11,8 +11,11 @@ type Proclama = {
   monto: number;
   categoria: string;
   publicada: boolean;
+  reacciones: Record<string, number> | null;
   stripe_session_id: string | null;
   created_at: string;
+  apoyos: number;
+  monto_total: number;
 };
 
 type Categoria = {
@@ -23,7 +26,27 @@ type Categoria = {
   activa: boolean;
 };
 
-type Tab = "proclamas" | "gratis" | "categorias";
+type Tab = "proclamas" | "gratis" | "categorias" | "stats";
+
+function StatCard({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+}) {
+  return (
+    <div className="bg-surface border border-line rounded-2xl p-5">
+      <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-2">
+        {label}
+      </p>
+      <p className="text-foreground text-3xl font-extrabold">{value}</p>
+      {sub && <p className="text-muted text-sm mt-1">{sub}</p>}
+    </div>
+  );
+}
 
 export default function AdminPage() {
   const { tr, lang } = useLanguage();
@@ -84,7 +107,8 @@ export default function AdminPage() {
 
   // ── Proclamas actions ──────────────────────────────────────────────
   async function handleDelete(id: string, texto: string) {
-    if (!confirm(`${tr("adminDeleteConfirm")}\n\n"${texto.slice(0, 80)}"`)) return;
+    if (!confirm(`${tr("adminDeleteConfirm")}\n\n"${texto.slice(0, 80)}"`))
+      return;
     setActionLoading(id + "-d");
     const res = await fetch("/api/admin/delete", {
       method: "POST",
@@ -105,7 +129,9 @@ export default function AdminPage() {
     });
     if (res.ok) {
       const d = await res.json();
-      setProclamaas((p) => p.map((x) => (x.id === id ? { ...x, publicada: d.publicada } : x)));
+      setProclamaas((p) =>
+        p.map((x) => (x.id === id ? { ...x, publicada: d.publicada } : x))
+      );
     } else alert(tr("adminToggleError"));
     setActionLoading(null);
   }
@@ -163,7 +189,9 @@ export default function AdminPage() {
     });
     if (res.ok) {
       const d = await res.json();
-      setCategorias((c) => c.map((x) => (x.id === id ? { ...x, activa: d.activa } : x)));
+      setCategorias((c) =>
+        c.map((x) => (x.id === id ? { ...x, activa: d.activa } : x))
+      );
     }
   }
 
@@ -183,7 +211,12 @@ export default function AdminPage() {
     const res = await fetch("/api/admin/categorias/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password, nombre_es: newNombreEs, nombre_en: newNombreEn, emoji: newEmoji }),
+      body: JSON.stringify({
+        password,
+        nombre_es: newNombreEs,
+        nombre_en: newNombreEn,
+        emoji: newEmoji,
+      }),
     });
     if (res.ok) {
       const d = await res.json();
@@ -200,16 +233,37 @@ export default function AdminPage() {
     if (t === "categorias" || t === "gratis") loadCats();
   }
 
+  // ── Stats ──────────────────────────────────────────────────────────
+  const stats = useMemo(() => {
+    const pub = proclamas.filter((p) => p.publicada);
+    const ingresos = pub.reduce((sum, p) => sum + p.monto, 0) / 100;
+    const totalReacciones = pub.reduce((sum, p) => {
+      const r = p.reacciones ?? {};
+      return sum + Object.values(r).reduce((a, b) => a + b, 0);
+    }, 0);
+    const catCounts: Record<string, number> = {};
+    pub.forEach((p) => {
+      catCounts[p.categoria] = (catCounts[p.categoria] ?? 0) + 1;
+    });
+    const catPopular =
+      Object.entries(catCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
+    const masCara = pub.sort((a, b) => b.monto - a.monto)[0];
+    const promedio = pub.length > 0 ? ingresos / pub.length : 0;
+    return { ingresos, pub: pub.length, totalReacciones, catPopular, masCara, promedio };
+  }, [proclamas]);
+
   // ─────────────────────────────────────────────────────────────────
   // Login screen
   if (!autenticado) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-4">
-        <div className="bg-[#111111] border border-[#1E1E1E] rounded-2xl p-8 w-full max-w-sm">
+      <div className="min-h-screen bg-bg flex items-center justify-center px-4">
+        <div className="bg-surface border border-line rounded-2xl p-8 w-full max-w-sm">
           <div className="text-center mb-6">
             <p className="text-3xl mb-2">🔒</p>
-            <h1 className="text-2xl font-bold text-white">{tr("adminTitle")}</h1>
-            <p className="text-[#A0A0A0] text-sm mt-1">{tr("adminSubtitle")}</p>
+            <h1 className="text-2xl font-bold text-foreground">
+              {tr("adminTitle")}
+            </h1>
+            <p className="text-muted text-sm mt-1">{tr("adminSubtitle")}</p>
           </div>
           <form onSubmit={login} className="space-y-4">
             <input
@@ -219,19 +273,24 @@ export default function AdminPage() {
               placeholder={tr("adminPasswordPlaceholder")}
               required
               autoFocus
-              className="w-full bg-[#0A0A0A] border border-[#1E1E1E] rounded-xl px-4 py-3 text-white placeholder-[#A0A0A0] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]"
+              className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent"
             />
-            {loginError && <p className="text-red-400 text-sm text-center">{loginError}</p>}
+            {loginError && (
+              <p className="text-red-400 text-sm text-center">{loginError}</p>
+            )}
             <button
               type="submit"
               disabled={loginLoading || !password}
-              className="w-full bg-[#3B82F6] text-white font-bold py-3 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40"
+              className="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40"
             >
               {loginLoading ? tr("adminLoginBtnLoading") : tr("adminLoginBtn")}
             </button>
           </form>
           <div className="mt-5 text-center">
-            <Link href="/" className="text-[#A0A0A0] text-sm hover:text-white transition-colors">
+            <Link
+              href="/"
+              className="text-muted text-sm hover:text-foreground transition-colors"
+            >
               {tr("adminBackToWall")}
             </Link>
           </div>
@@ -246,18 +305,24 @@ export default function AdminPage() {
   // ─────────────────────────────────────────────────────────────────
   // Main panel
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
-      <header className="border-b border-[#1E1E1E] sticky top-0 bg-[#0A0A0A]/95 backdrop-blur z-40">
+    <div className="min-h-screen bg-bg">
+      <header className="border-b border-line sticky top-0 bg-bg/95 backdrop-blur z-40">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-2xl font-extrabold text-white">
-              Proclama<span className="text-[#3B82F6]">.</span>
+            <Link
+              href="/"
+              className="text-2xl font-extrabold text-foreground"
+            >
+              Proclama<span className="text-accent">.</span>
             </Link>
-            <span className="bg-[#3B82F6]/20 text-[#3B82F6] text-xs font-semibold px-2 py-0.5 rounded-full">
+            <span className="bg-accent/20 text-accent text-xs font-semibold px-2 py-0.5 rounded-full">
               Admin
             </span>
           </div>
-          <Link href="/" className="text-[#A0A0A0] hover:text-white text-sm transition-colors">
+          <Link
+            href="/"
+            className="text-muted hover:text-foreground text-sm transition-colors"
+          >
             {tr("adminBackToWall")}
           </Link>
         </div>
@@ -265,54 +330,96 @@ export default function AdminPage() {
 
       <main className="max-w-5xl mx-auto px-4 py-8">
         {/* Tabs */}
-        <div className="flex gap-1 bg-[#111111] border border-[#1E1E1E] rounded-xl p-1 mb-8 w-fit">
-          {(["proclamas", "gratis", "categorias"] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => switchTab(t)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                tab === t ? "bg-[#3B82F6] text-white" : "text-[#A0A0A0] hover:text-white"
-              }`}
-            >
-              {t === "proclamas" ? tr("adminTabProclamaas") : t === "gratis" ? tr("adminTabFree") : tr("adminTabCats")}
-            </button>
-          ))}
+        <div className="flex gap-1 bg-surface border border-line rounded-xl p-1 mb-8 w-fit flex-wrap">
+          {(["proclamas", "gratis", "categorias", "stats"] as Tab[]).map(
+            (t) => (
+              <button
+                key={t}
+                onClick={() => switchTab(t)}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                  tab === t
+                    ? "bg-accent text-white"
+                    : "text-muted hover:text-foreground"
+                }`}
+              >
+                {t === "proclamas"
+                  ? tr("adminTabProclamaas")
+                  : t === "gratis"
+                  ? tr("adminTabFree")
+                  : t === "categorias"
+                  ? tr("adminTabCats")
+                  : tr("adminTabStats")}
+              </button>
+            )
+          )}
         </div>
 
         {/* ── Tab: Proclamas ── */}
         {tab === "proclamas" && (
           <div>
             <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
-              <h2 className="text-lg font-bold text-white">
+              <h2 className="text-lg font-bold text-foreground">
                 {tr("adminProclamasTitle")} ({proclamas.length})
               </h2>
               <div className="flex items-center gap-4 text-sm">
-                <span className="text-emerald-400 font-medium">{pub} {tr("adminPublished")}</span>
-                <span className="text-orange-400 font-medium">{hid} {tr("adminHidden")}</span>
+                <span className="text-emerald-400 font-medium">
+                  {pub} {tr("adminPublished")}
+                </span>
+                <span className="text-orange-400 font-medium">
+                  {hid} {tr("adminHidden")}
+                </span>
               </div>
             </div>
 
             <div className="space-y-2">
               {proclamas.map((p) => {
-                const busy = actionLoading === p.id + "-d" || actionLoading === p.id + "-t";
+                const busy =
+                  actionLoading === p.id + "-d" ||
+                  actionLoading === p.id + "-t";
                 return (
                   <div
                     key={p.id}
-                    className={`bg-[#111111] border rounded-xl px-5 py-4 ${p.publicada ? "border-[#1E1E1E]" : "border-orange-900/40 bg-orange-950/10"}`}
+                    className={`bg-surface border rounded-xl px-5 py-4 ${
+                      p.publicada
+                        ? "border-line"
+                        : "border-orange-900/40 bg-orange-950/10"
+                    }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                       <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium leading-snug mb-2">
+                        <p className="text-foreground font-medium leading-snug mb-2">
                           &ldquo;{p.texto}&rdquo;
                         </p>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                          <span className="text-[#A0A0A0]">— {p.autor}</span>
-                          <span className="text-emerald-400 font-bold">${(p.monto / 100).toFixed(2)}</span>
-                          <span className="text-[#A0A0A0]">
-                            {new Date(p.created_at).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { day: "numeric", month: "short", year: "numeric" })}
+                          <span className="text-muted">— {p.autor}</span>
+                          <span className="text-emerald-400 font-bold">
+                            ${(p.monto / 100).toFixed(2)}
                           </span>
-                          <span className={p.publicada ? "text-emerald-400 font-medium" : "text-orange-400 font-medium"}>
-                            {p.publicada ? tr("adminStatusPub") : tr("adminStatusHid")}
+                          <span className="text-muted">
+                            {new Date(p.created_at).toLocaleDateString(
+                              lang === "es" ? "es-ES" : "en-US",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )}
+                          </span>
+                          {p.apoyos > 0 && (
+                            <span className="text-accent">
+                              🤝 {p.apoyos} creyentes
+                            </span>
+                          )}
+                          <span
+                            className={
+                              p.publicada
+                                ? "text-emerald-400 font-medium"
+                                : "text-orange-400 font-medium"
+                            }
+                          >
+                            {p.publicada
+                              ? tr("adminStatusPub")
+                              : tr("adminStatusHid")}
                           </span>
                         </div>
                       </div>
@@ -326,14 +433,20 @@ export default function AdminPage() {
                               : "bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50"
                           }`}
                         >
-                          {actionLoading === p.id + "-t" ? "…" : p.publicada ? tr("adminHideBtn") : tr("adminShowBtn")}
+                          {actionLoading === p.id + "-t"
+                            ? "…"
+                            : p.publicada
+                            ? tr("adminHideBtn")
+                            : tr("adminShowBtn")}
                         </button>
                         <button
                           onClick={() => handleDelete(p.id, p.texto)}
                           disabled={busy}
                           className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors disabled:opacity-40"
                         >
-                          {actionLoading === p.id + "-d" ? "…" : tr("adminDeleteBtn")}
+                          {actionLoading === p.id + "-d"
+                            ? "…"
+                            : tr("adminDeleteBtn")}
                         </button>
                       </div>
                     </div>
@@ -347,68 +460,92 @@ export default function AdminPage() {
         {/* ── Tab: Nueva Gratis ── */}
         {tab === "gratis" && (
           <div className="max-w-2xl">
-            <h2 className="text-lg font-bold text-white mb-1">{tr("adminFreeTitle")}</h2>
-            <p className="text-[#A0A0A0] text-sm mb-6">{tr("adminFreeDesc")}</p>
+            <h2 className="text-lg font-bold text-foreground mb-1">
+              {tr("adminFreeTitle")}
+            </h2>
+            <p className="text-muted text-sm mb-6">{tr("adminFreeDesc")}</p>
 
-            <form onSubmit={handleFree} className="bg-[#111111] border border-[#1E1E1E] rounded-2xl p-6 space-y-5">
+            <form
+              onSubmit={handleFree}
+              className="bg-surface border border-line rounded-2xl p-6 space-y-5"
+            >
               <div>
-                <label className="block text-sm font-semibold text-[#A0A0A0] mb-2">Texto *</label>
+                <label className="block text-sm font-semibold text-muted mb-2">
+                  Texto *
+                </label>
                 <textarea
                   value={freeTexto}
                   onChange={(e) => setFreeTexto(e.target.value.slice(0, 280))}
                   rows={4}
                   required
-                  className="w-full bg-[#0A0A0A] border border-[#1E1E1E] rounded-xl px-4 py-3 text-white placeholder-[#A0A0A0] focus:outline-none focus:ring-1 focus:ring-[#3B82F6] resize-none"
+                  className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent resize-none"
                 />
-                <p className="text-right text-xs text-[#A0A0A0] mt-1">{freeTexto.length}/280</p>
+                <p className="text-right text-xs text-muted mt-1">
+                  {freeTexto.length}/280
+                </p>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#A0A0A0] mb-2">Autor *</label>
+                <label className="block text-sm font-semibold text-muted mb-2">
+                  Autor *
+                </label>
                 <input
                   type="text"
                   value={freeAutor}
                   onChange={(e) => setFreeAutor(e.target.value)}
                   required
                   maxLength={80}
-                  className="w-full bg-[#0A0A0A] border border-[#1E1E1E] rounded-xl px-4 py-3 text-white placeholder-[#A0A0A0] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]"
+                  className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#A0A0A0] mb-2">Categoría</label>
+                <label className="block text-sm font-semibold text-muted mb-2">
+                  Categoría
+                </label>
                 <select
                   value={freeCategoria}
                   onChange={(e) => setFreeCategoria(e.target.value)}
-                  className="w-full bg-[#0A0A0A] border border-[#1E1E1E] rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-[#3B82F6]"
+                  className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
                 >
-                  {categorias.filter((c) => c.activa).map((c) => (
-                    <option key={c.id} value={c.nombre_es}>
-                      {c.emoji} {lang === "es" ? c.nombre_es : c.nombre_en}
-                    </option>
-                  ))}
+                  {categorias
+                    .filter((c) => c.activa)
+                    .map((c) => (
+                      <option key={c.id} value={c.nombre_es}>
+                        {c.emoji}{" "}
+                        {lang === "es" ? c.nombre_es : c.nombre_en}
+                      </option>
+                    ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#A0A0A0] mb-2">
+                <label className="block text-sm font-semibold text-muted mb-2">
                   {tr("adminFreeMontoLabel")}
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A0A0A0]">$</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">
+                    $
+                  </span>
                   <input
                     type="number"
                     value={freeMonto}
                     onChange={(e) => setFreeMonto(e.target.value)}
                     min="0"
                     step="1"
-                    className="w-full bg-[#0A0A0A] border border-[#1E1E1E] rounded-xl pl-8 pr-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-[#3B82F6]"
+                    className="w-full bg-bg border border-line rounded-xl pl-8 pr-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
                   />
                 </div>
               </div>
 
               {freeMsg && (
-                <p className={`text-sm text-center font-medium ${freeMsg === tr("adminFreeSuccess") ? "text-emerald-400" : "text-red-400"}`}>
+                <p
+                  className={`text-sm text-center font-medium ${
+                    freeMsg === tr("adminFreeSuccess")
+                      ? "text-emerald-400"
+                      : "text-red-400"
+                  }`}
+                >
                   {freeMsg}
                 </p>
               )}
@@ -416,7 +553,7 @@ export default function AdminPage() {
               <button
                 type="submit"
                 disabled={freeLoading || !freeTexto.trim() || !freeAutor.trim()}
-                className="w-full bg-[#3B82F6] text-white font-bold py-3 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40"
+                className="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40"
               >
                 {freeLoading ? tr("adminFreeBtnLoading") : tr("adminFreeBtn")}
               </button>
@@ -427,17 +564,29 @@ export default function AdminPage() {
         {/* ── Tab: Categorías ── */}
         {tab === "categorias" && (
           <div>
-            <h2 className="text-lg font-bold text-white mb-6">{tr("adminCatsTitle")}</h2>
+            <h2 className="text-lg font-bold text-foreground mb-6">
+              {tr("adminCatsTitle")}
+            </h2>
 
-            {/* List */}
             <div className="space-y-2 mb-8">
               {categorias.map((cat) => (
-                <div key={cat.id} className="bg-[#111111] border border-[#1E1E1E] rounded-xl px-5 py-3 flex items-center gap-4">
+                <div
+                  key={cat.id}
+                  className="bg-surface border border-line rounded-xl px-5 py-3 flex items-center gap-4"
+                >
                   <span className="text-2xl">{cat.emoji}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium">{cat.nombre_es} / {cat.nombre_en}</p>
-                    <span className={`text-xs font-semibold ${cat.activa ? "text-emerald-400" : "text-[#A0A0A0]"}`}>
-                      {cat.activa ? tr("adminCatsActive") : tr("adminCatsInactive")}
+                    <p className="text-foreground font-medium">
+                      {cat.nombre_es} / {cat.nombre_en}
+                    </p>
+                    <span
+                      className={`text-xs font-semibold ${
+                        cat.activa ? "text-emerald-400" : "text-muted"
+                      }`}
+                    >
+                      {cat.activa
+                        ? tr("adminCatsActive")
+                        : tr("adminCatsInactive")}
                     </span>
                   </div>
                   <div className="flex gap-2">
@@ -449,7 +598,9 @@ export default function AdminPage() {
                           : "bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50"
                       }`}
                     >
-                      {cat.activa ? tr("adminCatsDeactivateBtn") : tr("adminCatsActivateBtn")}
+                      {cat.activa
+                        ? tr("adminCatsDeactivateBtn")
+                        : tr("adminCatsActivateBtn")}
                     </button>
                     <button
                       onClick={() => handleCatDelete(cat.id)}
@@ -462,49 +613,113 @@ export default function AdminPage() {
               ))}
             </div>
 
-            {/* New category form */}
-            <div className="bg-[#111111] border border-[#1E1E1E] rounded-2xl p-6">
-              <h3 className="text-white font-bold mb-4">{tr("adminCatsNewTitle")}</h3>
-              <form onSubmit={handleCatCreate} className="flex flex-wrap gap-3 items-end">
+            <div className="bg-surface border border-line rounded-2xl p-6">
+              <h3 className="text-foreground font-bold mb-4">
+                {tr("adminCatsNewTitle")}
+              </h3>
+              <form
+                onSubmit={handleCatCreate}
+                className="flex flex-wrap gap-3 items-end"
+              >
                 <div>
-                  <label className="block text-xs text-[#A0A0A0] mb-1">{tr("adminCatsEmoji")}</label>
+                  <label className="block text-xs text-muted mb-1">
+                    {tr("adminCatsEmoji")}
+                  </label>
                   <input
                     type="text"
                     value={newEmoji}
                     onChange={(e) => setNewEmoji(e.target.value)}
                     maxLength={4}
-                    className="w-16 bg-[#0A0A0A] border border-[#1E1E1E] rounded-xl px-3 py-2 text-white text-center focus:outline-none focus:ring-1 focus:ring-[#3B82F6]"
+                    className="w-16 bg-bg border border-line rounded-xl px-3 py-2 text-foreground text-center focus:outline-none focus:ring-1 focus:ring-accent"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-[#A0A0A0] mb-1">{tr("adminCatsNombreEs")}</label>
+                  <label className="block text-xs text-muted mb-1">
+                    {tr("adminCatsNombreEs")}
+                  </label>
                   <input
                     type="text"
                     value={newNombreEs}
                     onChange={(e) => setNewNombreEs(e.target.value)}
                     required
-                    className="bg-[#0A0A0A] border border-[#1E1E1E] rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#3B82F6] w-36"
+                    className="bg-bg border border-line rounded-xl px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-accent w-36"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-[#A0A0A0] mb-1">{tr("adminCatsNombreEn")}</label>
+                  <label className="block text-xs text-muted mb-1">
+                    {tr("adminCatsNombreEn")}
+                  </label>
                   <input
                     type="text"
                     value={newNombreEn}
                     onChange={(e) => setNewNombreEn(e.target.value)}
                     required
-                    className="bg-[#0A0A0A] border border-[#1E1E1E] rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#3B82F6] w-36"
+                    className="bg-bg border border-line rounded-xl px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-accent w-36"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={catLoading || !newNombreEs || !newNombreEn}
-                  className="bg-[#3B82F6] text-white font-semibold px-5 py-2 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40"
+                  className="bg-accent text-white font-semibold px-5 py-2 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40"
                 >
-                  {catLoading ? tr("adminCatsAddBtnLoading") : tr("adminCatsAddBtn")}
+                  {catLoading
+                    ? tr("adminCatsAddBtnLoading")
+                    : tr("adminCatsAddBtn")}
                 </button>
               </form>
             </div>
+          </div>
+        )}
+
+        {/* ── Tab: Stats ── */}
+        {tab === "stats" && (
+          <div>
+            <h2 className="text-lg font-bold text-foreground mb-6">
+              {tr("statsTitle")}
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+              <StatCard
+                label={tr("statsTotalIngresos")}
+                value={`$${stats.ingresos.toFixed(2)}`}
+              />
+              <StatCard
+                label={tr("statsPublicadas")}
+                value={String(stats.pub)}
+              />
+              <StatCard
+                label={tr("statsTotalReacciones")}
+                value={String(stats.totalReacciones)}
+              />
+              <StatCard
+                label={tr("statsCatPopular")}
+                value={stats.catPopular}
+              />
+              <StatCard
+                label={tr("statsPromedio")}
+                value={`$${stats.promedio.toFixed(2)}`}
+              />
+              {stats.masCara && (
+                <StatCard
+                  label={tr("statsMasCara")}
+                  value={`$${(stats.masCara.monto / 100).toFixed(2)}`}
+                  sub={stats.masCara.autor}
+                />
+              )}
+            </div>
+
+            {stats.masCara && (
+              <div className="bg-surface border border-line rounded-2xl p-6">
+                <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-3">
+                  {tr("statsMasCara")}
+                </p>
+                <p className="text-foreground text-lg font-medium leading-relaxed">
+                  &ldquo;{stats.masCara.texto}&rdquo;
+                </p>
+                <p className="text-muted text-sm mt-2">
+                  — {stats.masCara.autor}
+                </p>
+              </div>
+            )}
           </div>
         )}
       </main>

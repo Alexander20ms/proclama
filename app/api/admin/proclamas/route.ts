@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabase
     .from("proclamas")
-    .select("id, texto, autor, monto, categoria, publicada, stripe_session_id, created_at")
+    .select("id, texto, autor, monto, categoria, publicada, reacciones, stripe_session_id, created_at, apoyos, monto_total")
     .order("created_at", { ascending: false });
 
   if (error) {

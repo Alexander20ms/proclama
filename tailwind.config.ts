@@ -7,13 +7,16 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./contexts/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        bg: "#0A0A0A",
-        surface: "#111111",
-        border: "#1E1E1E",
-        muted: "#A0A0A0",
+        bg: "var(--color-bg)",
+        surface: "var(--color-surface)",
+        hover: "var(--color-hover)",
+        line: "var(--color-line)",
+        muted: "var(--color-muted)",
+        foreground: "var(--color-foreground)",
         accent: "#3B82F6",
       },
       keyframes: {

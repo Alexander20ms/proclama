@@ -8,10 +8,10 @@ async function getProclamaBySession(sessionId: string) {
   );
   const { data } = await supabase
     .from("proclamas")
-    .select("texto, autor")
+    .select("id, texto, autor")
     .eq("stripe_session_id", sessionId)
     .single();
-  return data as { texto: string; autor: string } | null;
+  return data as { id: string; texto: string; autor: string } | null;
 }
 
 export default async function ExitoPage({

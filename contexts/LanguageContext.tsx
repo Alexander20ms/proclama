@@ -9,16 +9,16 @@ import {
 } from "react";
 
 export type Lang = "es" | "en";
+export type Theme = "dark" | "light";
 
 const T = {
   es: {
-    // Modal
     langQuestion: "Elige tu idioma",
-    // Header
     tagline: "Tu creencia vale más que un tweet",
     publishBtn: "Publicar mi proclama",
     langToggle: "EN",
-    // Rankings
+    themeToggleDark: "☀️",
+    themeToggleLight: "🌙",
     rankingsTitle: "Rankings",
     rankTab1: "La más cara",
     rankTab2: "La más amada",
@@ -26,16 +26,19 @@ const T = {
     rankEmpty: "Sin datos aún",
     rankMonto: "Monto",
     rankReactions: "reacciones",
-    // Muro
     muroCount: "proclamas publicadas",
     muroSorted: "Mayor monto primero",
     muroEmpty: "El muro está vacío",
     muroEmptyDesc: "¡Sé la primera persona en proclamar algo al mundo!",
     muroEmptyBtn: "Publicar mi proclama",
-    // Back / Nav
+    searchPlaceholder: "Buscar por texto o autor...",
+    filterAll: "Todas las categorías",
+    sortLabel: "Ordenar",
+    sortMonto: "Mayor monto",
+    sortFecha: "Más reciente",
+    sortReacciones: "Más reacciones",
     backToWall: "← Ver el muro",
     viewWall: "Ver el muro →",
-    // Nueva
     nuevaTitle: "Nueva Proclama",
     nuevaDesc:
       "Escribe lo que quieres declarar al mundo. Paga mínimo $1 y quedará publicado para siempre.",
@@ -58,13 +61,12 @@ const T = {
     nuevaErrorAutor: "Ingresa tu nombre o apodo",
     nuevaErrorConexion: "Error de conexión. Intenta nuevamente.",
     nuevaErrorGenerico: "Ocurrió un error. Intenta nuevamente.",
-    // Exito
     exitoTitle: "¡Tu proclama fue publicada!",
     exitoDesc: "Ya está visible en el muro público para todo el mundo.",
     exitoShare: "Compartir en X",
     exitoTweetSuffix: "Lo proclamé públicamente en Proclama 📣",
     exitoTweetGeneric: "¡Acabo de publicar mi proclama en Proclama! 📣",
-    // Admin login
+    shareWhatsapp: "Compartir en WhatsApp",
     adminTitle: "Panel Admin",
     adminSubtitle: "Solo acceso autorizado",
     adminPasswordPlaceholder: "Contraseña",
@@ -72,11 +74,10 @@ const T = {
     adminLoginBtnLoading: "Verificando...",
     adminWrongPass: "Contraseña incorrecta",
     adminBackToWall: "← Volver al muro",
-    // Admin tabs
     adminTabProclamaas: "Proclamas",
     adminTabFree: "Nueva Gratis",
     adminTabCats: "Categorías",
-    // Admin proclamas
+    adminTabStats: "Estadísticas",
     adminProclamasTitle: "Todas las proclamas",
     adminPublished: "publicadas",
     adminHidden: "ocultas",
@@ -88,7 +89,6 @@ const T = {
     adminDeleteConfirm: "¿Eliminar permanentemente esta proclama?",
     adminDeleteError: "Error al eliminar.",
     adminToggleError: "Error al cambiar estado.",
-    // Admin free
     adminFreeTitle: "Nueva proclama gratuita",
     adminFreeDesc: "Se publica directamente sin pasar por Stripe",
     adminFreeMontoLabel: "Monto visible (decorativo, en $)",
@@ -96,7 +96,6 @@ const T = {
     adminFreeBtnLoading: "Publicando...",
     adminFreeSuccess: "¡Proclama publicada!",
     adminFreeError: "Error al publicar.",
-    // Admin categories
     adminCatsTitle: "Gestión de Categorías",
     adminCatsNombreEs: "Nombre ES",
     adminCatsNombreEn: "Nombre EN",
@@ -109,19 +108,34 @@ const T = {
     adminCatsAddBtn: "Agregar",
     adminCatsAddBtnLoading: "Agregando...",
     adminCatsNewTitle: "Nueva categoría",
-    // Reactions
+    statsTitle: "Estadísticas",
+    statsTotalIngresos: "Ingresos totales",
+    statsPublicadas: "Proclamas publicadas",
+    statsTotalReacciones: "Total reacciones",
+    statsCatPopular: "Categoría más popular",
+    statsMasCara: "Proclama más cara",
+    statsPromedio: "Monto promedio",
     reactAlready: "Ya reaccionaste con este emoji",
-    // Footer
+    creyentesCount: "creyentes",
+    creyentesTotal: "total",
+    apoyoBtn: "+ Unirme desde $1",
+    apoyoTitle: "Únete a esta proclama",
+    apoyoDesc: "Tu apoyo queda registrado para siempre",
+    apoyoBtn2: "Apoyar con",
+    apoyoBtnLoading: "Redirigiendo...",
+    apoyoSuccess: "¡Gracias por tu apoyo!",
     footer: "Proclama — Cada palabra tiene un precio",
+    verProclama: "Ver proclama completa →",
+    proclamaNotFound: "Proclama no encontrada",
+    proclamaNotFoundDesc: "Esta proclama no existe o no está publicada.",
   },
   en: {
-    // Modal
     langQuestion: "Choose your language",
-    // Header
     tagline: "Your belief is worth more than a tweet",
     publishBtn: "Publish my proclamation",
     langToggle: "ES",
-    // Rankings
+    themeToggleDark: "☀️",
+    themeToggleLight: "🌙",
     rankingsTitle: "Rankings",
     rankTab1: "Most expensive",
     rankTab2: "Most loved",
@@ -129,16 +143,19 @@ const T = {
     rankEmpty: "No data yet",
     rankMonto: "Amount",
     rankReactions: "reactions",
-    // Muro
     muroCount: "published proclamations",
     muroSorted: "Highest amount first",
     muroEmpty: "The wall is empty",
     muroEmptyDesc: "Be the first person to proclaim something to the world!",
     muroEmptyBtn: "Publish my proclamation",
-    // Back / Nav
+    searchPlaceholder: "Search by text or author...",
+    filterAll: "All categories",
+    sortLabel: "Sort",
+    sortMonto: "Highest amount",
+    sortFecha: "Most recent",
+    sortReacciones: "Most reactions",
     backToWall: "← View the wall",
     viewWall: "View the wall →",
-    // Nueva
     nuevaTitle: "New Proclamation",
     nuevaDesc:
       "Write what you want to declare to the world. Pay minimum $1 and it will be published forever.",
@@ -161,13 +178,12 @@ const T = {
     nuevaErrorAutor: "Enter your name or alias",
     nuevaErrorConexion: "Connection error. Try again.",
     nuevaErrorGenerico: "An error occurred. Try again.",
-    // Exito
     exitoTitle: "Your proclamation was published!",
     exitoDesc: "It is now visible on the public wall for everyone.",
     exitoShare: "Share on X",
     exitoTweetSuffix: "I publicly proclaimed it on Proclama 📣",
     exitoTweetGeneric: "I just published my proclamation on Proclama! 📣",
-    // Admin login
+    shareWhatsapp: "Share on WhatsApp",
     adminTitle: "Admin Panel",
     adminSubtitle: "Authorized access only",
     adminPasswordPlaceholder: "Password",
@@ -175,11 +191,10 @@ const T = {
     adminLoginBtnLoading: "Verifying...",
     adminWrongPass: "Incorrect password",
     adminBackToWall: "← Back to wall",
-    // Admin tabs
     adminTabProclamaas: "Proclamations",
     adminTabFree: "New Free",
     adminTabCats: "Categories",
-    // Admin proclamas
+    adminTabStats: "Statistics",
     adminProclamasTitle: "All proclamations",
     adminPublished: "published",
     adminHidden: "hidden",
@@ -191,7 +206,6 @@ const T = {
     adminDeleteConfirm: "Permanently delete this proclamation?",
     adminDeleteError: "Error deleting.",
     adminToggleError: "Error changing status.",
-    // Admin free
     adminFreeTitle: "New free proclamation",
     adminFreeDesc: "Published directly without Stripe",
     adminFreeMontoLabel: "Visible amount (decorative, in $)",
@@ -199,7 +213,6 @@ const T = {
     adminFreeBtnLoading: "Publishing...",
     adminFreeSuccess: "Proclamation published!",
     adminFreeError: "Error publishing.",
-    // Admin categories
     adminCatsTitle: "Category Management",
     adminCatsNombreEs: "Name ES",
     adminCatsNombreEn: "Name EN",
@@ -212,10 +225,26 @@ const T = {
     adminCatsAddBtn: "Add",
     adminCatsAddBtnLoading: "Adding...",
     adminCatsNewTitle: "New category",
-    // Reactions
+    statsTitle: "Statistics",
+    statsTotalIngresos: "Total revenue",
+    statsPublicadas: "Published proclamations",
+    statsTotalReacciones: "Total reactions",
+    statsCatPopular: "Most popular category",
+    statsMasCara: "Most expensive",
+    statsPromedio: "Average amount",
     reactAlready: "You already reacted with this emoji",
-    // Footer
+    creyentesCount: "believers",
+    creyentesTotal: "total",
+    apoyoBtn: "+ Join from $1",
+    apoyoTitle: "Join this proclamation",
+    apoyoDesc: "Your support is permanently recorded",
+    apoyoBtn2: "Support with",
+    apoyoBtnLoading: "Redirecting...",
+    apoyoSuccess: "Thank you for your support!",
     footer: "Proclama — Every word has a price",
+    verProclama: "View full proclamation →",
+    proclamaNotFound: "Proclamation not found",
+    proclamaNotFoundDesc: "This proclamation does not exist or is not published.",
   },
 } as const;
 
@@ -225,6 +254,8 @@ type Ctx = {
   lang: Lang;
   setLang: (l: Lang) => void;
   tr: (k: TKey) => string;
+  theme: Theme;
+  toggleTheme: () => void;
   mounted: boolean;
 };
 
@@ -232,21 +263,31 @@ const LanguageContext = createContext<Ctx>({
   lang: "es",
   setLang: () => {},
   tr: (k) => k,
+  theme: "dark",
+  toggleTheme: () => {},
   mounted: false,
 });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("es");
+  const [theme, setThemeState] = useState<Theme>("dark");
   const [showModal, setShowModal] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("proclama_lang") as Lang | null;
-    if (saved === "es" || saved === "en") {
-      setLangState(saved);
-    } else {
-      setShowModal(true);
-    }
+    // Language
+    const savedLang = localStorage.getItem("proclama_lang") as Lang | null;
+    if (savedLang === "es" || savedLang === "en") setLangState(savedLang);
+    else setShowModal(true);
+
+    // Theme
+    const savedTheme = localStorage.getItem("proclama_theme") as Theme | null;
+    const initialTheme = savedTheme ?? "dark";
+    setThemeState(initialTheme);
+    // Apply (script in layout already did this, but sync state)
+    if (initialTheme === "dark") document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
+
     setMounted(true);
   }, []);
 
@@ -256,30 +297,39 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setShowModal(false);
   }
 
+  function toggleTheme() {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    setThemeState(next);
+    localStorage.setItem("proclama_theme", next);
+    if (next === "dark") document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
+  }
+
   function tr(k: TKey): string {
     return T[lang][k] as string;
   }
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, tr, mounted }}>
+    <LanguageContext.Provider value={{ lang, setLang, tr, theme, toggleTheme, mounted }}>
+      {/* Language selection modal */}
       {mounted && showModal && (
-        <div className="fixed inset-0 bg-[#0A0A0A] z-50 flex flex-col items-center justify-center gap-8 px-4">
-          <p className="text-5xl font-extrabold text-white tracking-tight">
-            Proclama
+        <div className="fixed inset-0 bg-bg z-50 flex flex-col items-center justify-center gap-8 px-4">
+          <p className="text-5xl font-extrabold text-foreground tracking-tight">
+            Proclama<span className="text-accent">.</span>
           </p>
-          <p className="text-[#A0A0A0] text-lg">
+          <p className="text-muted text-lg">
             Elige tu idioma · Choose your language
           </p>
           <div className="flex gap-4 mt-2">
             <button
               onClick={() => setLang("es")}
-              className="bg-[#3B82F6] text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-500 transition-colors text-lg"
+              className="bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-500 transition-colors text-lg"
             >
               🇪🇸 Español
             </button>
             <button
               onClick={() => setLang("en")}
-              className="bg-[#1E1E1E] border border-[#2A2A2A] text-white font-bold px-8 py-4 rounded-xl hover:bg-[#2A2A2A] transition-colors text-lg"
+              className="bg-surface border border-line text-foreground font-bold px-8 py-4 rounded-xl hover:bg-hover transition-colors text-lg"
             >
               🇺🇸 English
             </button>

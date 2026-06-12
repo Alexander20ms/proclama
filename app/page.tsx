@@ -12,7 +12,9 @@ async function getProclamaas(): Promise<Proclama[]> {
 
   const { data, error } = await supabase
     .from("proclamas")
-    .select("id, texto, autor, monto, categoria, reacciones, created_at")
+    .select(
+      "id, texto, autor, monto, categoria, reacciones, created_at, apoyos, monto_total"
+    )
     .eq("publicada", true)
     .order("monto", { ascending: false });
 
@@ -25,5 +27,8 @@ async function getProclamaas(): Promise<Proclama[]> {
 
 export default async function Home() {
   const proclamas = await getProclamaas();
-  return <HomeClient proclamas={proclamas} />;
+  const catSet: Record<string, boolean> = {};
+  proclamas.forEach((p) => { if (p.categoria) catSet[p.categoria] = true; });
+  const categorias = Object.keys(catSet);
+  return <HomeClient proclamas={proclamas} categorias={categorias} />;
 }

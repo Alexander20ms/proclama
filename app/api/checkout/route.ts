@@ -84,6 +84,7 @@ export async function POST(request: Request) {
       success_url: `${process.env.NEXT_PUBLIC_URL}/exito?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/nueva`,
       metadata: {
+        tipo: "proclama",
         proclama_id: proclama.id,
       },
     });
