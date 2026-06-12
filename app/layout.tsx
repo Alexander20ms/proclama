@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -15,15 +16,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
-      <body className={`${inter.variable} font-sans bg-gray-50 min-h-screen antialiased`}>
-        {children}
+    <html lang="es" className="dark">
+      <body className={`${inter.variable} font-sans bg-[#0A0A0A] text-white min-h-screen antialiased`}>
+        <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
   );
