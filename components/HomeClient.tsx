@@ -34,7 +34,7 @@ export default function HomeClient({
 
   const fetchPage = useCallback(async (p: number, reset = false) => {
     setLoading(true);
-    const params = new URLSearchParams({ page: String(p), limit: "20" });
+    const params = new URLSearchParams({ page: String(p), limit: "40" });
 
     try {
       const res = await fetch(`/api/proclamas?${params}`);
@@ -98,7 +98,7 @@ export default function HomeClient({
             onClick={() => { window.location.href = HOME_URL; }}
             className="w-full bg-accent text-white font-bold px-4 py-2.5 rounded-xl hover:bg-blue-500 transition-colors text-sm text-center"
           >
-            🏠 Home
+            Home
           </button>
         </div>
       </header>
@@ -146,7 +146,7 @@ export default function HomeClient({
 
                 {!hasMore && proclamas.length > 0 && (
                   <p className="text-center text-muted text-sm py-10">
-                    You&apos;ve seen everything 🌌
+                    You&apos;ve seen everything
                   </p>
                 )}
               </>
