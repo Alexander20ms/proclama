@@ -123,7 +123,7 @@ export default function NuevaPage() {
                 href="/billetera"
                 className="text-sm font-semibold text-accent hover:text-blue-400 transition-colors"
               >
-                {saldo.toLocaleString()} 🌌
+                {saldo.toLocaleString()} ♦️
               </Link>
             )}
           </div>
@@ -154,7 +154,7 @@ export default function NuevaPage() {
             <div>
               <label className="block text-sm font-semibold text-muted mb-2">
                 Nebulas to stake <span className="text-red-500">*</span>
-                <span className="text-xs font-normal ml-2">(min 2 🌌)</span>
+                <span className="text-xs font-normal ml-2">(min 2 ♦️)</span>
               </label>
               <div className="flex flex-wrap gap-2 mb-3">
                 {NEBULOSAS_PRESET.map((n) => (
@@ -168,7 +168,7 @@ export default function NuevaPage() {
                         : "bg-line text-muted hover:bg-hover hover:text-foreground"
                     }`}
                   >
-                    {n} 🌌
+                    {n} ♦️
                   </button>
                 ))}
                 <button
@@ -219,7 +219,7 @@ export default function NuevaPage() {
             {saldo !== null && nebulasFinales >= 2 && !saldoSuficiente && (
               <div className="bg-orange-900/20 border border-orange-800/50 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
                 <p className="text-orange-400 text-sm font-medium">
-                  Insufficient nebulas — you have {saldo} 🌌, need {nebulasFinales} 🌌
+                  Insufficient nebulas — you have {saldo} ♦️, need {nebulasFinales} ♦️
                 </p>
                 <Link
                   href="/billetera"
@@ -244,7 +244,7 @@ export default function NuevaPage() {
               {loading
                 ? tr("nuevaBtnLoading")
                 : nebulasFinales >= 2
-                ? `Publish — ${nebulasFinales} 🌌`
+                ? `Publish — ${nebulasFinales} ♦️`
                 : "Publish"}
             </button>
 

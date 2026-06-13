@@ -267,7 +267,7 @@ export default function AdminPage() {
               {t === "proclamas" ? tr("adminTabProclamaas")
                 : t === "respuestas" ? tr("adminTabRespuestas")
                 : t === "gratis" ? tr("adminTabFree")
-                : t === "nebulosas" ? "🌌 Nebulas"
+                : t === "nebulosas" ? "♦️ Nebulas"
                 : tr("adminTabStats")}
             </button>
           ))}
@@ -459,7 +459,7 @@ export default function AdminPage() {
         {/* ── Nebulas ── */}
         {tab === "nebulosas" && (
           <div>
-            <h2 className="text-lg font-bold text-foreground mb-6">🌌 Nebulas Overview</h2>
+            <h2 className="text-lg font-bold text-foreground mb-6">♦️ Nebulas Overview</h2>
             {!nebulaStats ? (
               <p className="text-muted text-sm">Loading...</p>
             ) : (
@@ -487,7 +487,7 @@ export default function AdminPage() {
                       <div key={u.username} className="flex items-center justify-between text-sm">
                         <span className="text-muted mr-2 w-4 text-right">{i + 1}.</span>
                         <span className="text-foreground font-medium flex-1 truncate">@{u.username}</span>
-                        <span className="text-accent font-bold ml-2">{u.nebulosas.toLocaleString()} 🌌</span>
+                        <span className="text-accent font-bold ml-2">{u.nebulosas.toLocaleString()} ♦️</span>
                       </div>
                     ))}
                     {nebulaStats.top5Gastadores.length === 0 && (

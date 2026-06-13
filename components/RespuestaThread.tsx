@@ -139,7 +139,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="text-foreground text-sm font-semibold">{r.autor}</span>
                       <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/20">
-                        🌌 {Number(r.monto).toFixed(0)}
+                        ♦️ {Number(r.monto).toFixed(0)}
                       </span>
                       <span className="text-muted text-xs">{formatDate(r.created_at)}</span>
                     </div>
@@ -172,7 +172,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                 >
                   <div className="w-8 h-8 rounded-full bg-line flex items-center justify-center text-muted text-xs shrink-0">+</div>
                   <span className="text-muted text-sm group-hover:text-foreground transition-colors">
-                    Login to reply with nebulas 🌌
+                    Login to reply with nebulas ♦️
                   </span>
                 </Link>
               )
@@ -190,7 +190,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                 <div className="flex justify-between items-center">
                   <span className="text-muted text-xs">
                     {profile?.username && <span className="font-semibold text-foreground">@{profile.username}</span>}
-                    {saldo !== null && <span className="ml-2">· {saldo} 🌌 available</span>}
+                    {saldo !== null && <span className="ml-2">· {saldo} ♦️ available</span>}
                   </span>
                   <span className={`text-xs ${texto.length >= 260 ? "text-orange-400" : "text-muted"}`}>
                     {texto.length}/280
@@ -198,7 +198,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                 </div>
 
                 <div>
-                  <p className="text-muted text-xs mb-2">Nebulas to stake (min 2 🌌)</p>
+                  <p className="text-muted text-xs mb-2">Nebulas to stake (min 2 ♦️)</p>
                   <div className="flex flex-wrap gap-2">
                     {NEBULOSAS_PRESET.map((n) => (
                       <button
@@ -211,7 +211,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                             : "bg-line text-muted hover:bg-hover hover:text-foreground"
                         }`}
                       >
-                        {n} 🌌
+                        {n} ♦️
                       </button>
                     ))}
                     <button
@@ -263,7 +263,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                     disabled={!texto.trim() || nebulasFinales < 2 || !saldoSuficiente || submitting}
                     className="bg-accent text-white font-bold px-5 py-2 rounded-xl text-sm hover:bg-blue-500 transition-colors disabled:opacity-40"
                   >
-                    {submitting ? tr("apoyoBtnLoading") : `Reply — ${nebulasFinales >= 2 ? nebulasFinales : 2} 🌌`}
+                    {submitting ? tr("apoyoBtnLoading") : `Reply — ${nebulasFinales >= 2 ? nebulasFinales : 2} ♦️`}
                   </button>
                 </div>
               </form>

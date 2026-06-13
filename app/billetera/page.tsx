@@ -49,6 +49,10 @@ function BilleteraContent() {
   const [recargarLoading, setRecargarLoading] = useState<string | null>(null);
   const [recargarMsg, setRecargarMsg] = useState("");
 
+  // Custom recharge
+  const [customUsd, setCustomUsd] = useState("");
+  const [customLoading, setCustomLoading] = useState(false);
+
   // Gift form
   const [giftUsername, setGiftUsername] = useState("");
   const [giftAmount, setGiftAmount] = useState("");
@@ -99,6 +103,25 @@ function BilleteraContent() {
       window.location.href = d.url;
     } else {
       setRecargarLoading(null);
+    }
+  }
+
+  async function handleCustomRecharge() {
+    const amt = parseFloat(customUsd);
+    if (!amt || amt < 1) return;
+    setCustomLoading(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { setCustomLoading(false); return; }
+    const res = await fetch("/api/billetera/recargar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ custom_amount_usd: amt }),
+    });
+    const d = await res.json();
+    if (d.url) {
+      window.location.href = d.url;
+    } else {
+      setCustomLoading(false);
     }
   }
 
@@ -167,7 +190,7 @@ function BilleteraContent() {
           ) : (
             <>
               <div className="text-6xl font-extrabold text-foreground leading-none mb-2">
-                {nebulosas.toLocaleString()} 🌌
+                {nebulosas.toLocaleString()} ♦️
               </div>
               <p className="text-muted text-lg">Nebulas</p>
               <p className="text-muted text-sm mt-1">≈ ${usdEquiv} USD</p>
@@ -191,7 +214,7 @@ function BilleteraContent() {
                 <div>
                   <p className="text-white font-extrabold text-xl">⚡ BEST VALUE</p>
                   <p className="text-purple-200 text-sm mt-0.5">Recharge $50 and get <span className="text-white font-bold">75% MORE nebulas!</span></p>
-                  <p className="text-purple-300 text-xs mt-1">175 🌌 instead of 100 🌌</p>
+                  <p className="text-purple-300 text-xs mt-1">175 ♦️ instead of 100 ♦️</p>
                 </div>
                 <button
                   onClick={() => handleRecharge("p50")}
@@ -212,7 +235,7 @@ function BilleteraContent() {
                 <div>
                   <p className="text-white font-bold">🔥 HOT DEAL</p>
                   <p className="text-orange-200 text-xs mt-0.5">Recharge $20, get <span className="text-white font-semibold">50% more!</span></p>
-                  <p className="text-orange-300 text-xs">60 🌌 instead of 40 🌌</p>
+                  <p className="text-orange-300 text-xs">60 ♦️ instead of 40 ♦️</p>
                 </div>
                 <button
                   onClick={() => handleRecharge("p20")}
@@ -231,7 +254,7 @@ function BilleteraContent() {
                 <div>
                   <p className="text-white font-bold">💎 PREMIUM</p>
                   <p className="text-blue-200 text-xs mt-0.5">Recharge $100, get <span className="text-white font-semibold">25% more!</span></p>
-                  <p className="text-blue-300 text-xs">500 🌌 instead of 400 🌌</p>
+                  <p className="text-blue-300 text-xs">500 ♦️ instead of 400 ♦️</p>
                 </div>
                 <button
                   onClick={() => handleRecharge("p100")}
@@ -248,7 +271,7 @@ function BilleteraContent() {
         {/* Recharge table */}
         <div className="bg-surface border border-line rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-line">
-            <h2 className="text-foreground font-bold text-lg">Recharge Nebulas 🌌</h2>
+            <h2 className="text-foreground font-bold text-lg">Recharge Nebulas ♦️</h2>
           </div>
           <div className="divide-y divide-line">
             {PACKAGES.map((pkg) => (
@@ -256,7 +279,7 @@ function BilleteraContent() {
                 <div className="flex items-center gap-4">
                   <span className="text-foreground font-bold text-lg">${pkg.amount_usd}</span>
                   <div>
-                    <span className="text-foreground font-semibold">{pkg.nebulosas} 🌌</span>
+                    <span className="text-foreground font-semibold">{pkg.nebulosas} ♦️</span>
                     {pkg.bonus && (
                       <span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-accent/20 text-accent">
                         +{pkg.bonus}
@@ -281,9 +304,43 @@ function BilleteraContent() {
           </div>
         </div>
 
+        {/* Custom recharge */}
+        <div className="bg-surface border border-line rounded-2xl p-6">
+          <h2 className="text-foreground font-bold text-lg mb-1">Custom amount</h2>
+          <p className="text-muted text-sm mb-4">Enter amount in USD (minimum $1)</p>
+          <div className="flex gap-3 items-start">
+            <div className="flex-1">
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted font-semibold">$</span>
+                <input
+                  type="number"
+                  value={customUsd}
+                  onChange={(e) => setCustomUsd(e.target.value)}
+                  placeholder="0"
+                  min="1"
+                  step="1"
+                  className="w-full bg-bg border border-line rounded-xl pl-8 pr-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                />
+              </div>
+              {customUsd && parseFloat(customUsd) >= 1 && (
+                <p className="text-muted text-xs mt-2">
+                  You will receive <span className="text-foreground font-bold">{Math.floor(parseFloat(customUsd) * 4).toLocaleString("en-US")} ♦️ nebulas</span>
+                </p>
+              )}
+            </div>
+            <button
+              onClick={handleCustomRecharge}
+              disabled={customLoading || !customUsd || parseFloat(customUsd) < 1}
+              className="bg-accent text-white font-bold px-5 py-3 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40 text-sm shrink-0"
+            >
+              {customLoading ? "…" : `Recharge${customUsd && parseFloat(customUsd) >= 1 ? ` $${parseFloat(customUsd).toFixed(0)}` : ""}`}
+            </button>
+          </div>
+        </div>
+
         {/* Send nebulas */}
         <div className="bg-surface border border-line rounded-2xl p-6">
-          <h2 className="text-foreground font-bold text-lg mb-4">Send Nebulas 🌌</h2>
+          <h2 className="text-foreground font-bold text-lg mb-4">Send Nebulas ♦️</h2>
           <form onSubmit={handleGift} className="space-y-3">
             <input
               type="text"
@@ -309,7 +366,7 @@ function BilleteraContent() {
                 disabled={giftLoading || !giftUsername || !giftAmount}
                 className="bg-accent text-white font-bold px-5 py-3 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40 text-sm"
               >
-                {giftLoading ? "…" : "Send 🌌"}
+                {giftLoading ? "…" : "Send ♦️"}
               </button>
             </div>
             <input
@@ -345,7 +402,7 @@ function BilleteraContent() {
                 return (
                   <div key={tx.id} className="flex items-center justify-between px-5 py-3.5">
                     <div className="flex items-center gap-3">
-                      <span className="text-xl">{TX_ICONS[tx.tipo] ?? "🌌"}</span>
+                      <span className="text-xl">{TX_ICONS[tx.tipo] ?? "♦️"}</span>
                       <div>
                         <p className="text-foreground text-sm font-medium">
                           {tx.descripcion ?? tx.tipo}
@@ -358,7 +415,7 @@ function BilleteraContent() {
                         isPositive ? "text-emerald-400" : "text-red-400"
                       }`}
                     >
-                      {isPositive ? "+" : ""}{Number(tx.nebulosas).toFixed(0)} 🌌
+                      {isPositive ? "+" : ""}{Number(tx.nebulosas).toFixed(0)} ♦️
                     </span>
                   </div>
                 );

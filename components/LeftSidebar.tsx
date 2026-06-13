@@ -65,7 +65,7 @@ export default function LeftSidebar({ search, onSearchChange }: Props) {
           href="/billetera"
           className="mx-3 flex items-center justify-center gap-1.5 border border-line rounded-xl px-4 py-2 text-sm font-semibold text-foreground hover:bg-hover transition-colors"
         >
-          <span>🌌</span>
+          <span>♦️</span>
           <span>{nebulosas.toLocaleString()} nebulas</span>
         </Link>
       )}

@@ -64,7 +64,7 @@ export async function POST(request: Request) {
         user_id: userId,
         tipo: "recarga",
         nebulosas,
-        descripcion: `Wallet recharge — ${nebulosas} 🌌`,
+        descripcion: `Wallet recharge — ${nebulosas} ♦️`,
         stripe_session_id: session.id,
       });
 

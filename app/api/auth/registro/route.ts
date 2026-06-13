@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       user_id: authData.user.id,
       tipo: "bienvenida",
       nebulosas: 40,
-      descripcion: "Welcome nebulas 🌌",
+      descripcion: "Welcome nebulas ♦️",
     });
 
     return NextResponse.json({ ok: true });

@@ -58,7 +58,7 @@ function formatDateTime(dateStr: string): string {
 }
 
 function AmountBadge({ tier, nebulosas }: { tier: TierInfo; nebulosas: number }) {
-  const label = `🌌 ${nebulosas.toLocaleString()}`;
+  const label = `♦️ ${Math.round(nebulosas).toLocaleString("en-US")}`;
 
   if (tier.level === 0) {
     return (
@@ -97,10 +97,11 @@ export default function ProclamaCard({
 }) {
   const { tr } = useLanguage();
   const [threadOpen, setThreadOpen] = useState(false);
-  // Use nebulosas field if present; otherwise convert from legacy monto (cents)
-  const nebulasDisplay = proclama.nebulosas != null
-    ? Number(proclama.nebulosas)
-    : Math.round(proclama.monto / 25);
+  const nebulasDisplay = (() => {
+    if (proclama.nebulosas && Number(proclama.nebulosas) > 0) return Number(proclama.nebulosas);
+    if (proclama.monto && proclama.monto > 0) return Math.round(proclama.monto / 25);
+    return 2;
+  })();
   const tier = getTierFromNebulosas(nebulasDisplay);
 
   const fecha = formatDateTime(proclama.created_at);

@@ -47,7 +47,7 @@ export default function RegistroPage() {
         return;
       }
 
-      setSuccess("Welcome! You received 40 🌌 nebulas to get started");
+      setSuccess("Welcome! You received 40 ♦️ nebulas to get started");
       setTimeout(() => router.push("/"), 1800);
     } catch {
       setError(tr("nuevaErrorConexion"));
