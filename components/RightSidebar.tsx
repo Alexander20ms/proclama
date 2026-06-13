@@ -26,10 +26,9 @@ function Avatar({ name, size = "sm" }: { name: string; size?: "sm" | "md" }) {
 
 export default function RightSidebar({
   proclamas,
-  totalCount,
 }: {
   proclamas: Proclama[];
-  totalCount: number;
+  totalCount?: number;
 }) {
   const { lang } = useLanguage();
 
@@ -47,7 +46,7 @@ export default function RightSidebar({
   const reactsHoy = hoy.reduce((s, p) => s + totalReacciones(p.reacciones), 0);
 
   return (
-    <div className="flex flex-col gap-6 py-4">
+    <div className="flex flex-col gap-6 py-4 pl-6">
       {/* Rankings */}
       <div>
         <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-3">
@@ -121,10 +120,7 @@ export default function RightSidebar({
             <span className="text-muted">Reacciones</span>
             <span className="text-foreground font-bold">{reactsHoy}</span>
           </div>
-          <div className="flex justify-between text-xs border-t border-line pt-2 mt-2">
-            <span className="text-muted">Total publicadas</span>
-            <span className="text-accent font-bold">{totalCount}</span>
-          </div>
+
         </div>
       </div>
     </div>

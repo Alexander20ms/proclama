@@ -16,6 +16,7 @@ export type Proclama = {
   created_at: string;
   apoyos: number;
   monto_total: number;
+  user_id?: string | null;
 };
 
 const COLORS = [
@@ -72,9 +73,18 @@ export default function ProclamaCard({
         <div className="flex-1 min-w-0">
           {/* Header row */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
-            <span className="text-foreground font-bold text-sm leading-none">
-              {proclama.autor}
-            </span>
+            {proclama.user_id ? (
+              <Link
+                href={`/u/${encodeURIComponent(proclama.autor)}`}
+                className="text-foreground font-bold text-sm leading-none hover:text-accent transition-colors"
+              >
+                {proclama.autor}
+              </Link>
+            ) : (
+              <span className="text-foreground font-bold text-sm leading-none">
+                {proclama.autor}
+              </span>
+            )}
             <span className="text-muted text-xs">{fecha}</span>
             <div className="ml-auto flex items-center gap-1.5">
               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent">

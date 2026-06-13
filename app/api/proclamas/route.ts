@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   let query = supabase
     .from("proclamas")
     .select(
-      "id, texto, autor, monto, categoria, reacciones, created_at, apoyos, monto_total",
+      "id, texto, autor, monto, categoria, reacciones, created_at, apoyos, monto_total, user_id",
       { count: "exact" }
     )
     .eq("publicada", true);

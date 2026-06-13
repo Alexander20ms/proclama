@@ -14,7 +14,7 @@ const supabase = createClient(
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { texto, autor, monto, categoria } = body;
+    const { texto, autor, monto, categoria, user_id } = body;
 
     if (!texto || !autor || !monto || !categoria) {
       return NextResponse.json(
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
         monto: montoEnCentavos,
         categoria: String(categoria),
         publicada: false,
+        ...(user_id ? { user_id: String(user_id) } : {}),
       })
       .select()
       .single();

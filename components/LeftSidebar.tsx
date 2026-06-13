@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import UserMenu from "./UserMenu";
 
 type CategoriaItem = { nombre: string; emoji: string };
 
@@ -17,32 +18,40 @@ type Props = {
 
 export default function LeftSidebar({
   categorias,
-  totalProclamaas,
-  totalReacciones,
   selectedCategoria,
   onCategoriaChange,
   search,
   onSearchChange,
 }: Props) {
   const { tr, lang, setLang, toggleTheme, theme } = useLanguage();
+  const { user } = useAuth();
+
+  function handlePublish() {
+    window.location.href = user ? "/nueva" : "/login?next=/nueva";
+  }
 
   return (
     <div className="flex flex-col gap-2 py-4">
-      {/* Logo */}
-      <div className="px-3 mb-2">
-        <span className="text-2xl font-extrabold text-foreground tracking-tight">
-          Proclama<span className="text-accent">.</span>
-        </span>
-        <p className="text-muted text-xs mt-0.5">{tr("tagline")}</p>
+      {/* Logo + UserMenu */}
+      <div className="px-3 mb-2 flex items-start justify-between gap-2">
+        <div>
+          <span className="text-2xl font-extrabold text-foreground tracking-tight">
+            Proclama<span className="text-accent">.</span>
+          </span>
+          <p className="text-muted text-xs mt-0.5">{tr("tagline")}</p>
+        </div>
+        <div className="pt-0.5">
+          <UserMenu />
+        </div>
       </div>
 
       {/* Publish button */}
-      <Link
-        href="/nueva"
+      <button
+        onClick={handlePublish}
         className="mx-3 bg-accent text-white font-bold px-4 py-2.5 rounded-xl hover:bg-blue-500 transition-colors text-sm text-center"
       >
         {tr("publishBtn")}
-      </Link>
+      </button>
 
       {/* Search */}
       <div className="px-3 mt-2">
@@ -55,46 +64,23 @@ export default function LeftSidebar({
         />
       </div>
 
-      {/* Categories */}
-      <div className="mt-3">
-        <p className="text-muted text-xs font-semibold uppercase tracking-wider px-3 mb-1">
+      {/* Categories dropdown */}
+      <div className="px-3 mt-3">
+        <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-1.5">
           Categorías
         </p>
-        <button
-          onClick={() => onCategoriaChange("all")}
-          className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
-            selectedCategoria === "all"
-              ? "bg-accent/15 text-accent"
-              : "text-muted hover:bg-hover hover:text-foreground"
-          }`}
+        <select
+          value={selectedCategoria}
+          onChange={(e) => onCategoriaChange(e.target.value)}
+          className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent cursor-pointer"
         >
-          🌐 {tr("filterAll")}
-        </button>
-        {categorias.map((cat) => (
-          <button
-            key={cat.nombre}
-            onClick={() => onCategoriaChange(cat.nombre)}
-            className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
-              selectedCategoria === cat.nombre
-                ? "bg-accent/15 text-accent"
-                : "text-muted hover:bg-hover hover:text-foreground"
-            }`}
-          >
-            {cat.emoji} {cat.nombre}
-          </button>
-        ))}
-      </div>
-
-      {/* Stats */}
-      <div className="mt-4 mx-3 border-t border-line pt-4 space-y-2">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted">Proclamas</span>
-          <span className="text-foreground font-bold">{totalProclamaas}</span>
-        </div>
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted">Reacciones</span>
-          <span className="text-foreground font-bold">{totalReacciones}</span>
-        </div>
+          <option value="all">🌐 {tr("filterAll")}</option>
+          {categorias.map((cat) => (
+            <option key={cat.nombre} value={cat.nombre}>
+              {cat.emoji} {cat.nombre}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Controls */}
@@ -111,16 +97,6 @@ export default function LeftSidebar({
         >
           {tr("langToggle")}
         </button>
-      </div>
-
-      {/* Admin link */}
-      <div className="px-3 mt-2">
-        <Link
-          href="/admin"
-          className="text-muted hover:text-foreground text-xs transition-colors"
-        >
-          Admin →
-        </Link>
       </div>
     </div>
   );

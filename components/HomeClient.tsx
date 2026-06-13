@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import ProclamaCard, { type Proclama } from "./ProclamaCard";
 import LeftSidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
+import UserMenu from "./UserMenu";
 
-type SortKey = "monto" | "fecha" | "reacciones";
+type SortKey = "monto" | "reacciones";
 type CategoriaItem = { nombre: string; emoji: string };
 
 type Props = {
@@ -26,6 +28,7 @@ export default function HomeClient({
   totalReacciones,
 }: Props) {
   const { tr } = useLanguage();
+  const { user } = useAuth();
 
   const [proclamas, setProclamaas] = useState<Proclama[]>(initialProclamaas);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
@@ -109,7 +112,6 @@ export default function HomeClient({
 
   const SORT_OPTS: { key: SortKey; label: string }[] = [
     { key: "monto", label: tr("sortMonto") },
-    { key: "fecha", label: tr("sortFecha") },
     { key: "reacciones", label: tr("sortReacciones") },
   ];
 
@@ -117,16 +119,19 @@ export default function HomeClient({
     <div className="min-h-screen bg-bg">
       {/* Mobile header */}
       <header className="md:hidden sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-line">
-        <div className="px-4 py-3 flex items-center justify-between">
+        <div className="px-4 py-3 flex items-center justify-between gap-3">
           <span className="text-xl font-extrabold text-foreground">
             Proclama<span className="text-accent">.</span>
           </span>
-          <Link
-            href="/nueva"
-            className="bg-accent text-white font-bold px-4 py-1.5 rounded-xl text-sm"
-          >
-            {tr("publishBtn")}
-          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            <UserMenu />
+            <Link
+              href={user ? "/nueva" : "/login?next=/nueva"}
+              className="bg-accent text-white font-bold px-4 py-1.5 rounded-xl text-sm"
+            >
+              {tr("publishBtn")}
+            </Link>
+          </div>
         </div>
         {/* Mobile search */}
         <div className="px-4 pb-3">

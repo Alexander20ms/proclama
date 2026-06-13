@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Categoria = {
   id: string;
@@ -15,15 +17,23 @@ const MONTOS_PRESET = [1, 2, 5, 10, 20, 50];
 
 export default function NuevaPage() {
   const { tr, lang } = useLanguage();
+  const { user, profile, loading: authLoading } = useAuth();
+  const router = useRouter();
 
   const [texto, setTexto] = useState("");
-  const [autor, setAutor] = useState("");
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [categoriaId, setCategoriaId] = useState("");
   const [montoSel, setMontoSel] = useState<number | "custom">(1);
   const [montoCustom, setMontoCustom] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Auth guard
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login?next=/nueva&msg=login-required");
+    }
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     fetch("/api/categorias")
@@ -42,6 +52,8 @@ export default function NuevaPage() {
       ? `${cat.emoji} ${cat.nombre_es}`
       : `${cat.emoji} ${cat.nombre_en}`;
 
+  const autor = profile?.username ?? "";
+
   const puedeEnviar =
     texto.trim().length > 0 &&
     autor.trim().length > 0 &&
@@ -51,7 +63,7 @@ export default function NuevaPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!puedeEnviar) return;
+    if (!puedeEnviar || !user) return;
     setLoading(true);
     setError("");
 
@@ -71,6 +83,7 @@ export default function NuevaPage() {
           autor: autor.trim(),
           monto: montoFinal,
           categoria: categoriaNombre,
+          user_id: user.id,
         }),
       });
       const data = await res.json();
@@ -84,6 +97,14 @@ export default function NuevaPage() {
       setError(tr("nuevaErrorConexion"));
       setLoading(false);
     }
+  }
+
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-line border-t-accent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -139,21 +160,26 @@ export default function NuevaPage() {
               </div>
             </div>
 
-            {/* Autor */}
+            {/* Autor (read-only, from profile) */}
             <div>
               <label className="block text-sm font-semibold text-muted mb-2">
-                {tr("nuevaAutorLabel")}{" "}
-                <span className="text-red-500">*</span>
+                {tr("nuevaAutorLabel")}
               </label>
-              <input
-                type="text"
-                value={autor}
-                onChange={(e) => setAutor(e.target.value)}
-                placeholder={tr("nuevaAutorPlaceholder")}
-                required
-                maxLength={80}
-                className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
-              />
+              <div className="flex items-center gap-3 bg-bg border border-line rounded-xl px-4 py-3">
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
+                  style={{ backgroundColor: profile?.color ?? "#3B82F6" }}
+                >
+                  {autor[0]?.toUpperCase()}
+                </div>
+                <span className="text-foreground font-medium">{autor}</span>
+                <Link
+                  href="/perfil"
+                  className="ml-auto text-xs text-accent hover:underline"
+                >
+                  Cambiar →
+                </Link>
+              </div>
             </div>
 
             {/* Categoría */}

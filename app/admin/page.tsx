@@ -238,7 +238,17 @@ export default function AdminPage() {
     const sorted = [...pub].sort((a, b) => b.monto - a.monto);
     const masCara = sorted[0];
     const promedio = pub.length > 0 ? ingresos / pub.length : 0;
-    return { ingresos, pubCount: pub.length, totalReacciones, catPopular, masCara, promedio };
+
+    const autorCounts: Record<string, number> = {};
+    const autorMontos: Record<string, number> = {};
+    pub.forEach((p) => {
+      autorCounts[p.autor] = (autorCounts[p.autor] ?? 0) + 1;
+      autorMontos[p.autor] = (autorMontos[p.autor] ?? 0) + p.monto;
+    });
+    const top5ByCount = Object.entries(autorCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const top5ByMonto = Object.entries(autorMontos).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+    return { ingresos, pubCount: pub.length, totalReacciones, catPopular, masCara, promedio, top5ByCount, top5ByMonto };
   }, [proclamas]);
 
   // ─────────────────────────────────────────────────────────────────
@@ -517,12 +527,42 @@ export default function AdminPage() {
               )}
             </div>
             {stats.masCara && (
-              <div className="bg-surface border border-line rounded-2xl p-6">
+              <div className="bg-surface border border-line rounded-2xl p-6 mb-6">
                 <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-3">{tr("statsMasCara")}</p>
                 <p className="text-foreground text-lg font-medium leading-relaxed">&ldquo;{stats.masCara.texto}&rdquo;</p>
                 <p className="text-muted text-sm mt-2">— {stats.masCara.autor}</p>
               </div>
             )}
+
+            {/* Top authors */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="bg-surface border border-line rounded-2xl p-5">
+                <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-4">Top 5 — Most active</p>
+                <div className="space-y-2">
+                  {stats.top5ByCount.map(([autor, count], i) => (
+                    <div key={autor} className="flex items-center justify-between text-sm">
+                      <span className="text-muted mr-2 w-4 text-right">{i + 1}.</span>
+                      <span className="text-foreground font-medium flex-1 truncate">{autor}</span>
+                      <span className="text-accent font-bold ml-2">{count} pub.</span>
+                    </div>
+                  ))}
+                  {stats.top5ByCount.length === 0 && <p className="text-muted text-sm">No data yet.</p>}
+                </div>
+              </div>
+              <div className="bg-surface border border-line rounded-2xl p-5">
+                <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-4">Top 5 — Highest spend</p>
+                <div className="space-y-2">
+                  {stats.top5ByMonto.map(([autor, monto], i) => (
+                    <div key={autor} className="flex items-center justify-between text-sm">
+                      <span className="text-muted mr-2 w-4 text-right">{i + 1}.</span>
+                      <span className="text-foreground font-medium flex-1 truncate">{autor}</span>
+                      <span className="text-accent font-bold ml-2">${(monto / 100).toFixed(0)}</span>
+                    </div>
+                  ))}
+                  {stats.top5ByMonto.length === 0 && <p className="text-muted text-sm">No data yet.</p>}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </main>
