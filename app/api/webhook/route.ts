@@ -35,7 +35,42 @@ export async function POST(request: Request) {
     const session = event.data.object as Stripe.Checkout.Session;
     const tipo = session.metadata?.tipo;
 
-    if (tipo === "respuesta") {
+    if (tipo === "recarga") {
+      const userId = session.metadata?.user_id;
+      const nebulosas = parseFloat(session.metadata?.nebulosas_a_acreditar ?? "0");
+      if (!userId || !nebulosas) {
+        return NextResponse.json({ error: "Invalid recarga metadata" }, { status: 400 });
+      }
+
+      // Ensure wallet exists
+      const { data: wallet } = await supabase
+        .from("billeteras")
+        .select("nebulosas")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (wallet) {
+        await supabase
+          .from("billeteras")
+          .update({ nebulosas: Number(wallet.nebulosas) + nebulosas })
+          .eq("user_id", userId);
+      } else {
+        await supabase
+          .from("billeteras")
+          .insert({ user_id: userId, nebulosas });
+      }
+
+      await supabase.from("transacciones").insert({
+        user_id: userId,
+        tipo: "recarga",
+        nebulosas,
+        descripcion: `Wallet recharge — ${nebulosas} 🌌`,
+        stripe_session_id: session.id,
+      });
+
+      console.log(`Recarga: +${nebulosas} nebulas for user ${userId}`);
+
+    } else if (tipo === "respuesta") {
       const respuestaId = session.metadata?.respuesta_id;
       if (!respuestaId) {
         console.error("No respuesta_id in metadata:", session.id);

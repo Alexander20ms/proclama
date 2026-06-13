@@ -52,10 +52,22 @@ export async function POST(request: Request) {
     });
 
     if (profileError) {
-      // Rollback: delete the user we just created
       await supabase.auth.admin.deleteUser(authData.user.id);
       return NextResponse.json({ error: "Error creating profile" }, { status: 500 });
     }
+
+    // Create wallet with 40 welcome nebulas
+    await supabase.from("billeteras").insert({
+      user_id: authData.user.id,
+      nebulosas: 40,
+    });
+
+    await supabase.from("transacciones").insert({
+      user_id: authData.user.id,
+      tipo: "bienvenida",
+      nebulosas: 40,
+      descripcion: "Welcome nebulas 🌌",
+    });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const SELECT_FIELDS =
-  "id, texto, autor, monto, categoria, reacciones, created_at, apoyos, monto_total, user_id";
+  "id, texto, autor, monto, nebulosas, categoria, reacciones, created_at, apoyos, monto_total, user_id, autor_animal";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];

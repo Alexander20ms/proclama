@@ -5,7 +5,7 @@ import Link from "next/link";
 import ReactionBar from "./ReactionBar";
 import RespuestaThread from "./RespuestaThread";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getTier, type TierInfo } from "@/lib/tiers";
+import { getTierFromNebulosas, type TierInfo } from "@/lib/tiers";
 import { getAnimal } from "@/lib/animals";
 
 export type Proclama = {
@@ -13,6 +13,7 @@ export type Proclama = {
   texto: string;
   autor: string;
   monto: number;
+  nebulosas?: number | null;
   categoria: string;
   reacciones: Record<string, number>;
   created_at: string;
@@ -56,13 +57,13 @@ function formatDateTime(dateStr: string): string {
   });
 }
 
-function AmountBadge({ tier, monto }: { tier: TierInfo; monto: string }) {
-  const label = tier.amountEmoji ? `${tier.amountEmoji} ${monto}` : monto;
+function AmountBadge({ tier, nebulosas }: { tier: TierInfo; nebulosas: number }) {
+  const label = `🌌 ${nebulosas.toLocaleString()}`;
 
   if (tier.level === 0) {
     return (
-      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent">
-        {monto}
+      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/20">
+        {label}
       </span>
     );
   }
@@ -96,13 +97,11 @@ export default function ProclamaCard({
 }) {
   const { tr } = useLanguage();
   const [threadOpen, setThreadOpen] = useState(false);
-  const tier = getTier(proclama.monto);
-
-  const monto = (proclama.monto / 100).toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-  });
+  // Use nebulosas field if present; otherwise convert from legacy monto (cents)
+  const nebulasDisplay = proclama.nebulosas != null
+    ? Number(proclama.nebulosas)
+    : Math.round(proclama.monto / 25);
+  const tier = getTierFromNebulosas(nebulasDisplay);
 
   const fecha = formatDateTime(proclama.created_at);
 
@@ -163,7 +162,7 @@ export default function ProclamaCard({
             <span className="text-muted text-xs">{fecha}</span>
 
             <div className="ml-auto flex items-center gap-1.5">
-              <AmountBadge tier={tier} monto={monto} />
+              <AmountBadge tier={tier} nebulosas={nebulasDisplay} />
             </div>
           </div>
 

@@ -29,7 +29,7 @@ async function getData(username: string) {
   const { data: proclamas } = await supabase
     .from("proclamas")
     .select(
-      "id, texto, autor, monto, categoria, reacciones, created_at, apoyos, monto_total, user_id"
+      "id, texto, autor, monto, nebulosas, categoria, reacciones, created_at, apoyos, monto_total, user_id, autor_animal"
     )
     .eq("user_id", profile.id)
     .eq("publicada", true)

@@ -1,7 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 import UserMenu from "./UserMenu";
 
 type Props = {
@@ -12,6 +15,22 @@ type Props = {
 export default function LeftSidebar({ search, onSearchChange }: Props) {
   const { tr, toggleTheme, theme } = useLanguage();
   const { user } = useAuth();
+  const [nebulosas, setNebulosas] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user) { setNebulosas(null); return; }
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch("/api/billetera", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setNebulosas(Number(d.nebulosas));
+      }
+    })();
+  }, [user]);
 
   function handlePublish() {
     window.location.href = user ? "/nueva" : "/login?next=/nueva";
@@ -39,6 +58,17 @@ export default function LeftSidebar({ search, onSearchChange }: Props) {
       >
         {tr("publishBtn")}
       </button>
+
+      {/* Wallet link — only when logged in */}
+      {user && nebulosas !== null && (
+        <Link
+          href="/billetera"
+          className="mx-3 flex items-center justify-center gap-1.5 border border-line rounded-xl px-4 py-2 text-sm font-semibold text-foreground hover:bg-hover transition-colors"
+        >
+          <span>🌌</span>
+          <span>{nebulosas.toLocaleString()} nebulas</span>
+        </Link>
+      )}
 
       {/* Search */}
       <div className="px-3 mt-2">

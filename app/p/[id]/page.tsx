@@ -14,7 +14,7 @@ async function getProclama(id: string): Promise<Proclama | null> {
   const { data } = await supabase
     .from("proclamas")
     .select(
-      "id, texto, autor, monto, categoria, reacciones, created_at, apoyos, monto_total"
+      "id, texto, autor, monto, nebulosas, categoria, reacciones, created_at, apoyos, monto_total, user_id, autor_animal"
     )
     .eq("id", id)
     .eq("publicada", true)

@@ -15,7 +15,7 @@ type Respuesta = {
   monto: number; publicada: boolean; created_at: string;
 };
 
-type Tab = "proclamas" | "respuestas" | "gratis" | "stats";
+type Tab = "proclamas" | "respuestas" | "gratis" | "stats" | "nebulosas";
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -41,6 +41,13 @@ export default function AdminPage() {
 
   const [respuestas, setRespuestas] = useState<Respuesta[]>([]);
   const [respuestasLoaded, setRespuestasLoaded] = useState(false);
+
+  const [nebulaStats, setNebulaStats] = useState<{
+    totalCirculacion: number;
+    totalRecargadas: number;
+    top5Gastadores: { username: string; nebulosas: number }[];
+  } | null>(null);
+  const [nebulaStatsLoaded, setNebulaStatsLoaded] = useState(false);
 
   const [freeTexto, setFreeTexto] = useState("");
   const [freeAutor, setFreeAutor] = useState("");
@@ -156,9 +163,23 @@ export default function AdminPage() {
     setFreeLoading(false);
   }
 
+  async function loadNebulaStats() {
+    if (nebulaStatsLoaded) return;
+    const res = await fetch("/api/admin/nebulosas-stats", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    if (res.ok) {
+      const d = await res.json();
+      setNebulaStats(d);
+      setNebulaStatsLoaded(true);
+    }
+  }
+
   function switchTab(t: Tab) {
     setTab(t);
     if (t === "respuestas") loadRespuestas();
+    if (t === "nebulosas") loadNebulaStats();
   }
 
   // ── Stats ──────────────────────────────────────────────────────────
@@ -237,7 +258,7 @@ export default function AdminPage() {
       <main className="max-w-5xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-1 bg-surface border border-line rounded-xl p-1 mb-8 w-fit flex-wrap">
-          {(["proclamas", "respuestas", "gratis", "stats"] as Tab[]).map((t) => (
+          {(["proclamas", "respuestas", "gratis", "stats", "nebulosas"] as Tab[]).map((t) => (
             <button key={t} onClick={() => switchTab(t)}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
                 tab === t ? "bg-accent text-white" : "text-muted hover:text-foreground"
@@ -246,6 +267,7 @@ export default function AdminPage() {
               {t === "proclamas" ? tr("adminTabProclamaas")
                 : t === "respuestas" ? tr("adminTabRespuestas")
                 : t === "gratis" ? tr("adminTabFree")
+                : t === "nebulosas" ? "🌌 Nebulas"
                 : tr("adminTabStats")}
             </button>
           ))}
@@ -431,6 +453,50 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ── Nebulas ── */}
+        {tab === "nebulosas" && (
+          <div>
+            <h2 className="text-lg font-bold text-foreground mb-6">🌌 Nebulas Overview</h2>
+            {!nebulaStats ? (
+              <p className="text-muted text-sm">Loading...</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+                  <StatCard
+                    label="In Circulation"
+                    value={nebulaStats.totalCirculacion.toLocaleString()}
+                    sub="total across all wallets"
+                  />
+                  <StatCard
+                    label="Recharged (All Time)"
+                    value={nebulaStats.totalRecargadas.toLocaleString()}
+                    sub={`≈ $${(nebulaStats.totalRecargadas * 0.25).toFixed(2)} USD`}
+                  />
+                  <StatCard
+                    label="1 Nebula ="
+                    value="$0.25 USD"
+                  />
+                </div>
+                <div className="bg-surface border border-line rounded-2xl p-5">
+                  <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-4">Top 5 Spenders</p>
+                  <div className="space-y-2">
+                    {nebulaStats.top5Gastadores.map((u, i) => (
+                      <div key={u.username} className="flex items-center justify-between text-sm">
+                        <span className="text-muted mr-2 w-4 text-right">{i + 1}.</span>
+                        <span className="text-foreground font-medium flex-1 truncate">@{u.username}</span>
+                        <span className="text-accent font-bold ml-2">{u.nebulosas.toLocaleString()} 🌌</span>
+                      </div>
+                    ))}
+                    {nebulaStats.top5Gastadores.length === 0 && (
+                      <p className="text-muted text-sm">{tr("adminNoDataYet")}</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
       </main>

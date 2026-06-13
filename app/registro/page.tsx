@@ -15,6 +15,7 @@ export default function RegistroPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,7 +47,8 @@ export default function RegistroPage() {
         return;
       }
 
-      router.push("/");
+      setSuccess("Welcome! You received 40 🌌 nebulas to get started");
+      setTimeout(() => router.push("/"), 1800);
     } catch {
       setError(tr("nuevaErrorConexion"));
       setLoading(false);
@@ -120,6 +122,11 @@ export default function RegistroPage() {
             {error && (
               <div className="bg-red-900/20 border border-red-800/50 text-red-400 text-sm px-4 py-3 rounded-xl">
                 {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-emerald-900/20 border border-emerald-800/50 text-emerald-400 text-sm px-4 py-3 rounded-xl font-medium text-center">
+                {success}
               </div>
             )}
 

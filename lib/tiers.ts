@@ -10,10 +10,8 @@ export type TierInfo = {
   avatarClass: string;
 };
 
-export function getTier(montoCents: number): TierInfo {
-  const usd = montoCents / 100;
-
-  if (usd >= 1_000_000) {
+export function getTierFromNebulosas(nebulosas: number): TierInfo {
+  if (nebulosas >= 4_000_000) {
     return {
       level: 7,
       name: "Official Owner of Proclama",
@@ -26,7 +24,7 @@ export function getTier(montoCents: number): TierInfo {
       avatarClass: "tier-7-avatar",
     };
   }
-  if (usd >= 100_000) {
+  if (nebulosas >= 399_996) {
     return {
       level: 6,
       name: "Trillionaire",
@@ -39,7 +37,7 @@ export function getTier(montoCents: number): TierInfo {
       avatarClass: "tier-6-avatar",
     };
   }
-  if (usd >= 1_000) {
+  if (nebulosas >= 3_996) {
     return {
       level: 5,
       name: "Billionaire",
@@ -52,7 +50,7 @@ export function getTier(montoCents: number): TierInfo {
       avatarClass: "",
     };
   }
-  if (usd >= 100) {
+  if (nebulosas >= 396) {
     return {
       level: 4,
       name: "Millionaire",
@@ -65,7 +63,7 @@ export function getTier(montoCents: number): TierInfo {
       avatarClass: "",
     };
   }
-  if (usd >= 30) {
+  if (nebulosas >= 116) {
     return {
       level: 3,
       name: "Centurion",
@@ -78,7 +76,7 @@ export function getTier(montoCents: number): TierInfo {
       avatarClass: "",
     };
   }
-  if (usd >= 10) {
+  if (nebulosas >= 36) {
     return {
       level: 2,
       name: "Just a Tip",
@@ -91,7 +89,7 @@ export function getTier(montoCents: number): TierInfo {
       avatarClass: "",
     };
   }
-  if (usd >= 5) {
+  if (nebulosas >= 16) {
     return {
       level: 1,
       name: "Conformist",
@@ -115,4 +113,10 @@ export function getTier(montoCents: number): TierInfo {
     amountInnerClass: null,
     avatarClass: "",
   };
+}
+
+// Legacy: accepts monto in cents, converts to nebulosas then evaluates
+export function getTier(montoCents: number): TierInfo {
+  const nebulosas = montoCents / 25; // cents → dollars (/100) → nebulosas (/0.25) = /25
+  return getTierFromNebulosas(nebulosas);
 }
