@@ -177,7 +177,7 @@ export default function NuevaPage() {
                   href="/perfil"
                   className="ml-auto text-xs text-accent hover:underline"
                 >
-                  Cambiar →
+                  {tr("profileCambiar")}
                 </Link>
               </div>
             </div>

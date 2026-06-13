@@ -78,11 +78,11 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
       if (data.url) {
         window.location.href = data.url;
       } else {
-        setFormError(data.error ?? "Error inesperado");
+        setFormError(data.error ?? tr("nuevaErrorGenerico"));
         setSubmitting(false);
       }
     } catch {
-      setFormError("Error de conexión");
+      setFormError(tr("nuevaErrorConexion"));
       setSubmitting(false);
     }
   }
@@ -92,7 +92,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
       {/* Thread line + replies */}
       {loading ? (
         <div className="flex items-center gap-2 py-3 ml-12 text-muted text-xs">
-          <span className="animate-pulse">Cargando respuestas…</span>
+          <span className="animate-pulse">{tr("replyLoading")}</span>
         </div>
       ) : (
         <>
@@ -140,7 +140,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                   +
                 </div>
                 <span className="text-muted text-sm group-hover:text-foreground transition-colors">
-                  Escribe tu respuesta proclamada…
+                  {tr("replyPlaceholder")}
                 </span>
               </button>
             ) : (
@@ -149,7 +149,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                 <textarea
                   value={texto}
                   onChange={(e) => setTexto(e.target.value.slice(0, 280))}
-                  placeholder="Escribe tu respuesta proclamada…"
+                  placeholder={tr("replyPlaceholder")}
                   rows={3}
                   autoFocus
                   required
@@ -166,7 +166,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                   type="text"
                   value={autor}
                   onChange={(e) => setAutor(e.target.value)}
-                  placeholder="Tu nombre o apodo"
+                  placeholder={tr("replyAuthorPlaceholder")}
                   required
                   maxLength={80}
                   className="w-full bg-bg border border-line rounded-xl px-3 py-2 text-sm text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent"
@@ -174,7 +174,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
 
                 {/* Monto */}
                 <div>
-                  <p className="text-muted text-xs mb-2">Monto (mín. $1)</p>
+                  <p className="text-muted text-xs mb-2">{tr("replyAmountLabel")}</p>
                   <div className="flex flex-wrap gap-2">
                     {MONTOS.map((m) => (
                       <button
@@ -199,7 +199,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                           : "bg-line text-muted hover:bg-hover hover:text-foreground"
                       }`}
                     >
-                      Otro
+                      {tr("nuevaOtro")}
                     </button>
                   </div>
                   {monto === "custom" && (
@@ -230,7 +230,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                     onClick={() => { setShowForm(false); setFormError(""); }}
                     className="px-4 py-2 rounded-xl text-sm text-muted hover:text-foreground transition-colors"
                   >
-                    Cancelar
+                    {tr("replyCancel")}
                   </button>
                   <button
                     type="submit"
@@ -239,7 +239,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                   >
                     {submitting
                       ? tr("apoyoBtnLoading")
-                      : `Proclamar respuesta — $${montoFinal >= 1 ? montoFinal.toFixed(2) : "1.00"}`}
+                      : `${tr("replySubmitBtn")} — $${montoFinal >= 1 ? montoFinal.toFixed(2) : "1.00"}`}
                   </button>
                 </div>
               </form>

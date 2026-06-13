@@ -134,7 +134,7 @@ export default function AdminPage() {
   }
 
   async function handleRespuestaDelete(id: string) {
-    if (!confirm("¿Eliminar esta respuesta permanentemente?")) return;
+    if (!confirm(tr("adminRespDeleteConfirm2"))) return;
     setActionLoading(id + "-rd");
     const res = await fetch("/api/admin/respuestas/delete", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -310,7 +310,7 @@ export default function AdminPage() {
               }`}
             >
               {t === "proclamas" ? tr("adminTabProclamaas")
-                : t === "respuestas" ? "Respuestas"
+                : t === "respuestas" ? tr("adminTabRespuestas")
                 : t === "gratis" ? tr("adminTabFree")
                 : t === "categorias" ? tr("adminTabCats")
                 : tr("adminTabStats")}
@@ -367,14 +367,14 @@ export default function AdminPage() {
         {tab === "respuestas" && (
           <div>
             <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
-              <h2 className="text-lg font-bold text-foreground">Respuestas ({respuestas.length})</h2>
+              <h2 className="text-lg font-bold text-foreground">{tr("adminTabRespuestas")} ({respuestas.length})</h2>
               <div className="flex gap-4 text-sm">
-                <span className="text-emerald-400">{respuestas.filter((r) => r.publicada).length} publicadas</span>
-                <span className="text-orange-400">{respuestas.filter((r) => !r.publicada).length} ocultas</span>
+                <span className="text-emerald-400">{respuestas.filter((r) => r.publicada).length} {tr("adminRespPublished")}</span>
+                <span className="text-orange-400">{respuestas.filter((r) => !r.publicada).length} {tr("adminRespHidden")}</span>
               </div>
             </div>
             {respuestas.length === 0 ? (
-              <p className="text-muted text-sm">Sin respuestas aún.</p>
+              <p className="text-muted text-sm">{tr("adminRespEmpty")}</p>
             ) : (
               <div className="space-y-2">
                 {respuestas.map((r) => {
@@ -389,21 +389,21 @@ export default function AdminPage() {
                             <span className="text-emerald-400 font-bold">${Number(r.monto).toFixed(2)}</span>
                             <span className="text-muted">{new Date(r.created_at).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { day: "numeric", month: "short", year: "numeric" })}</span>
                             <Link href={`/p/${r.proclama_id}`} className="text-accent text-xs hover:underline">
-                              Ver proclama →
+                              {tr("adminRespViewProclama")}
                             </Link>
                             <span className={r.publicada ? "text-emerald-400 font-medium" : "text-orange-400 font-medium"}>
-                              {r.publicada ? "● Publicada" : "○ Oculta"}
+                              {r.publicada ? tr("adminRespStatusPub") : tr("adminRespStatusHid")}
                             </span>
                           </div>
                         </div>
                         <div className="flex gap-2 shrink-0">
                           <button onClick={() => handleRespuestaToggle(r.id)} disabled={busy}
                             className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-40 ${r.publicada ? "bg-orange-900/30 text-orange-400" : "bg-emerald-900/30 text-emerald-400"}`}>
-                            {actionLoading === r.id + "-rt" ? "…" : r.publicada ? "Ocultar" : "Publicar"}
+                            {actionLoading === r.id + "-rt" ? "…" : r.publicada ? tr("adminRespHideBtn") : tr("adminRespShowBtn")}
                           </button>
                           <button onClick={() => handleRespuestaDelete(r.id)} disabled={busy}
                             className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors disabled:opacity-40">
-                            {actionLoading === r.id + "-rd" ? "…" : "Eliminar"}
+                            {actionLoading === r.id + "-rd" ? "…" : tr("adminRespDeleteBtn")}
                           </button>
                         </div>
                       </div>
@@ -422,18 +422,18 @@ export default function AdminPage() {
             <p className="text-muted text-sm mb-6">{tr("adminFreeDesc")}</p>
             <form onSubmit={handleFree} className="bg-surface border border-line rounded-2xl p-6 space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-muted mb-2">Texto *</label>
+                <label className="block text-sm font-semibold text-muted mb-2">{tr("adminFreeTextoLabel")} *</label>
                 <textarea value={freeTexto} onChange={(e) => setFreeTexto(e.target.value.slice(0, 280))} rows={4} required
                   className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent resize-none" />
                 <p className="text-right text-xs text-muted mt-1">{freeTexto.length}/280</p>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-muted mb-2">Autor *</label>
+                <label className="block text-sm font-semibold text-muted mb-2">{tr("adminFreeAutorLabel")} *</label>
                 <input type="text" value={freeAutor} onChange={(e) => setFreeAutor(e.target.value)} required maxLength={80}
                   className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-muted mb-2">Categoría</label>
+                <label className="block text-sm font-semibold text-muted mb-2">{tr("adminFreeCatLabel")}</label>
                 <select value={freeCategoria} onChange={(e) => setFreeCategoria(e.target.value)}
                   className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-accent">
                   {categorias.filter((c) => c.activa).map((c) => (
@@ -537,7 +537,7 @@ export default function AdminPage() {
             {/* Top authors */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="bg-surface border border-line rounded-2xl p-5">
-                <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-4">Top 5 — Most active</p>
+                <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-4">{tr("adminTopActive")}</p>
                 <div className="space-y-2">
                   {stats.top5ByCount.map(([autor, count], i) => (
                     <div key={autor} className="flex items-center justify-between text-sm">
@@ -546,11 +546,11 @@ export default function AdminPage() {
                       <span className="text-accent font-bold ml-2">{count} pub.</span>
                     </div>
                   ))}
-                  {stats.top5ByCount.length === 0 && <p className="text-muted text-sm">No data yet.</p>}
+                  {stats.top5ByCount.length === 0 && <p className="text-muted text-sm">{tr("adminNoDataYet")}</p>}
                 </div>
               </div>
               <div className="bg-surface border border-line rounded-2xl p-5">
-                <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-4">Top 5 — Highest spend</p>
+                <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-4">{tr("adminTopSpend")}</p>
                 <div className="space-y-2">
                   {stats.top5ByMonto.map(([autor, monto], i) => (
                     <div key={autor} className="flex items-center justify-between text-sm">
@@ -559,7 +559,7 @@ export default function AdminPage() {
                       <span className="text-accent font-bold ml-2">${(monto / 100).toFixed(0)}</span>
                     </div>
                   ))}
-                  {stats.top5ByMonto.length === 0 && <p className="text-muted text-sm">No data yet.</p>}
+                  {stats.top5ByMonto.length === 0 && <p className="text-muted text-sm">{tr("adminNoDataYet")}</p>}
                 </div>
               </div>
             </div>

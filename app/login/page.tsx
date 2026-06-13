@@ -4,12 +4,14 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/";
   const msg = searchParams.get("msg");
+  const { tr } = useLanguage();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,21 +44,21 @@ function LoginForm() {
           <span className="text-4xl font-extrabold text-foreground tracking-tight">
             Proclama<span className="text-accent">.</span>
           </span>
-          <p className="text-muted text-sm mt-1">Value your opinions.</p>
+          <p className="text-muted text-sm mt-1">{tr("tagline")}</p>
         </Link>
 
         <div className="bg-surface border border-line rounded-2xl p-8">
-          <h1 className="text-xl font-bold text-foreground mb-2">Sign in</h1>
+          <h1 className="text-xl font-bold text-foreground mb-2">{tr("loginTitle")}</h1>
           {msg === "login-required" && (
             <p className="text-muted text-sm mb-5 bg-line px-4 py-2 rounded-lg">
-              Sign in to publish your proclamation.
+              {tr("loginRequired")}
             </p>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <div>
               <label className="block text-xs font-semibold text-muted mb-1.5 uppercase tracking-wider">
-                Email
+                {tr("profileEmailLabel")}
               </label>
               <input
                 type="email"
@@ -71,13 +73,13 @@ function LoginForm() {
 
             <div>
               <label className="block text-xs font-semibold text-muted mb-1.5 uppercase tracking-wider">
-                Password
+                {tr("loginPasswordPlaceholder")}
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Your password"
+                placeholder={tr("loginPasswordPlaceholder")}
                 required
                 className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent"
               />
@@ -94,14 +96,14 @@ function LoginForm() {
               disabled={loading || !email || !password}
               className="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {loading ? "Signing in…" : "Sign in"}
+              {loading ? tr("loginBtnLoading2") : tr("loginBtn2")}
             </button>
           </form>
 
           <p className="text-center text-muted text-sm mt-6">
-            No account?{" "}
+            {tr("noAccount")}{" "}
             <Link href="/registro" className="text-accent hover:underline font-medium">
-              Create one
+              {tr("createOne")}
             </Link>
           </p>
         </div>

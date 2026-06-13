@@ -24,7 +24,7 @@ export default async function Home() {
   // Active categories from categorias table
   const { data: catsData } = await supabase
     .from("categorias")
-    .select("nombre_es, emoji")
+    .select("nombre_es, nombre_en, emoji")
     .eq("activa", true)
     .order("nombre_es", { ascending: true });
 
@@ -38,7 +38,8 @@ export default async function Home() {
   }, 0);
 
   const categorias = (catsData ?? []).map((c) => ({
-    nombre: c.nombre_es,
+    nombre_es: c.nombre_es,
+    nombre_en: c.nombre_en,
     emoji: c.emoji,
   }));
 

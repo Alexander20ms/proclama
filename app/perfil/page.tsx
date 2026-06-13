@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/lib/supabase";
 
 const PRESET_COLORS = [
@@ -25,6 +26,7 @@ type Tab = "info" | "proclamas";
 export default function PerfilPage() {
   const router = useRouter();
   const { user, profile, loading: authLoading, signOut, refreshProfile } = useAuth();
+  const { tr, lang } = useLanguage();
 
   const [tab, setTab] = useState<Tab>("info");
   const [misProclamas, setMisProclamaas] = useState<MiProclama[]>([]);
@@ -97,7 +99,7 @@ export default function PerfilPage() {
             onClick={handleSignOut}
             className="text-muted hover:text-red-400 text-sm transition-colors"
           >
-            Sign out
+            {tr("signOut")}
           </button>
         </div>
       </header>
@@ -120,8 +122,8 @@ export default function PerfilPage() {
         {/* Tabs */}
         <div className="flex gap-1 bg-surface border border-line rounded-xl p-1 mb-6 w-fit">
           {([
-            { key: "info", label: "My info" },
-            { key: "proclamas", label: "My proclamas" },
+            { key: "info", label: tr("profileTabInfo") },
+            { key: "proclamas", label: tr("profileTabProclamaas") },
           ] as { key: Tab; label: string }[]).map((t) => (
             <button
               key={t.key}
@@ -139,15 +141,15 @@ export default function PerfilPage() {
         {tab === "info" && (
           <div className="bg-surface border border-line rounded-2xl p-6 space-y-6">
             <div>
-              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">Username</p>
+              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">{tr("profileUsernameLabel")}</p>
               <p className="text-foreground font-medium">@{profile.username}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">Email</p>
+              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">{tr("profileEmailLabel")}</p>
               <p className="text-foreground font-medium">{user.email}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Avatar color</p>
+              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">{tr("profileAvatarColor")}</p>
               <div className="flex flex-wrap gap-3">
                 {PRESET_COLORS.map((c) => (
                   <button
@@ -168,7 +170,7 @@ export default function PerfilPage() {
                 disabled={savingColor || selectedColor === profile.color}
                 className="mt-4 bg-accent text-white font-bold px-6 py-2 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm"
               >
-                {savingColor ? "Saving…" : colorSaved ? "Saved!" : "Save color"}
+                {savingColor ? tr("profileSaving") : colorSaved ? tr("profileSaved") : tr("profileSaveColor")}
               </button>
             </div>
           </div>
@@ -184,13 +186,13 @@ export default function PerfilPage() {
             ) : misProclamas.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-5xl mb-4">📣</p>
-                <p className="text-foreground font-bold mb-2">No proclamas yet</p>
-                <p className="text-muted text-sm mb-6">Publish your first proclamation.</p>
+                <p className="text-foreground font-bold mb-2">{tr("profileNoProclamaas")}</p>
+                <p className="text-muted text-sm mb-6">{tr("profileNoProclamaasDesc")}</p>
                 <Link
                   href="/nueva"
                   className="bg-accent text-white font-bold px-6 py-2.5 rounded-xl hover:bg-blue-500 transition-colors"
                 >
-                  Publish one
+                  {tr("publishBtn")}
                 </Link>
               </div>
             ) : (
@@ -200,7 +202,7 @@ export default function PerfilPage() {
                     {misProclamas.length} proclama{misProclamas.length !== 1 ? "s" : ""}
                   </p>
                   <p className="text-muted text-sm">
-                    Total spent:{" "}
+                    {tr("profileTotalSpent")}{" "}
                     <span className="text-accent font-bold">${totalGastado.toFixed(2)}</span>
                   </p>
                 </div>
@@ -220,11 +222,10 @@ export default function PerfilPage() {
                           ${(p.monto / 100).toFixed(0)}
                         </span>
                         <span>
-                          {new Date(p.created_at).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                          {new Date(p.created_at).toLocaleDateString(
+                            lang === "es" ? "es-ES" : "en-US",
+                            { month: "short", day: "numeric", year: "numeric" }
+                          )}
                         </span>
                       </div>
                     </Link>

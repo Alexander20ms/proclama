@@ -30,7 +30,7 @@ export default function RightSidebar({
   proclamas: Proclama[];
   totalCount?: number;
 }) {
-  const { lang } = useLanguage();
+  const { lang, tr } = useLanguage();
 
   const top3 = [...proclamas].sort((a, b) => b.monto - a.monto).slice(0, 3);
   const medals = ["🥇", "🥈", "🥉"];
@@ -47,10 +47,10 @@ export default function RightSidebar({
 
   return (
     <div className="flex flex-col gap-6 py-4 pl-6">
-      {/* Rankings */}
+      {/* Top proclamas */}
       <div>
         <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-3">
-          Top proclamas
+          {tr("rightTopProclamaas")}
         </p>
         <div className="space-y-3">
           {top3.map((p, i) => (
@@ -76,7 +76,7 @@ export default function RightSidebar({
       {/* Recent */}
       <div>
         <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-3">
-          Más recientes
+          {tr("rightMasRecientes")}
         </p>
         <div className="space-y-3">
           {recent.map((p) => (
@@ -105,22 +105,21 @@ export default function RightSidebar({
       {/* Today stats */}
       <div className="border-t border-line pt-4">
         <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-3">
-          Hoy
+          {tr("rightHoy")}
         </p>
         <div className="space-y-2">
           <div className="flex justify-between text-xs">
-            <span className="text-muted">Nuevas proclamas</span>
+            <span className="text-muted">{tr("rightNuevasProclamaas")}</span>
             <span className="text-foreground font-bold">{hoy.length}</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-muted">Generado</span>
+            <span className="text-muted">{tr("rightGenerado")}</span>
             <span className="text-foreground font-bold">${ingresosHoy.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-muted">Reacciones</span>
+            <span className="text-muted">{tr("rightReacciones")}</span>
             <span className="text-foreground font-bold">{reactsHoy}</span>
           </div>
-
         </div>
       </div>
     </div>

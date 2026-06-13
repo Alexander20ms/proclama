@@ -10,7 +10,7 @@ import RightSidebar from "./RightSidebar";
 import UserMenu from "./UserMenu";
 
 type SortKey = "monto" | "reacciones";
-type CategoriaItem = { nombre: string; emoji: string };
+type CategoriaItem = { nombre_es: string; nombre_en: string; emoji: string };
 
 type Props = {
   initialProclamaas: Proclama[];
@@ -27,7 +27,7 @@ export default function HomeClient({
   categorias,
   totalReacciones,
 }: Props) {
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
   const { user } = useAuth();
 
   const [proclamas, setProclamaas] = useState<Proclama[]>(initialProclamaas);
@@ -153,19 +153,19 @@ export default function HomeClient({
                 : "bg-line text-muted"
             }`}
           >
-            Todas
+            {tr("allShort")}
           </button>
           {categorias.map((c) => (
             <button
-              key={c.nombre}
-              onClick={() => setCategoria(c.nombre)}
+              key={c.nombre_es}
+              onClick={() => setCategoria(c.nombre_es)}
               className={`shrink-0 text-xs font-semibold px-3 py-1 rounded-full transition-colors ${
-                categoria === c.nombre
+                categoria === c.nombre_es
                   ? "bg-accent text-white"
                   : "bg-line text-muted"
               }`}
             >
-              {c.emoji} {c.nombre}
+              {c.emoji} {lang === "es" ? c.nombre_es : c.nombre_en}
             </button>
           ))}
         </div>
@@ -215,7 +215,7 @@ export default function HomeClient({
               <p className="text-5xl mb-5">📣</p>
               <h2 className="text-2xl font-bold text-foreground mb-2">
                 {debouncedSearch || categoria !== "all"
-                  ? "Sin resultados"
+                  ? tr("noResults")
                   : tr("muroEmpty")}
               </h2>
               {!debouncedSearch && categoria === "all" && (

@@ -138,7 +138,7 @@ export default function ProclamaPageClient({
                   <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.261 5.635 5.903-5.635zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
-                  Compartir
+                  {tr("shareBtn")}
                 </a>
               </div>
             </div>
@@ -149,8 +149,8 @@ export default function ProclamaPageClient({
         <div className="px-4 pt-2 pb-8">
           <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-3">
             {initialRespuestas.length > 0
-              ? `${initialRespuestas.length} respuesta${initialRespuestas.length !== 1 ? "s" : ""}`
-              : "Respuestas"}
+              ? `${initialRespuestas.length} ${tr("responsesLabel").toLowerCase()}`
+              : tr("responsesLabel")}
           </p>
           <RespuestaThread
             proclamaId={proclama.id}

@@ -4,9 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function RegistroPage() {
   const router = useRouter();
+  const { tr } = useLanguage();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -20,7 +22,6 @@ export default function RegistroPage() {
     setError("");
 
     try {
-      // Create user + profile via server route (uses service role)
       const res = await fetch("/api/auth/registro", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -29,12 +30,11 @@ export default function RegistroPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error ?? "Error creating account");
+        setError(data.error ?? tr("nuevaErrorGenerico"));
         setLoading(false);
         return;
       }
 
-      // Sign in immediately after registration
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -48,7 +48,7 @@ export default function RegistroPage() {
 
       router.push("/");
     } catch {
-      setError("Connection error. Try again.");
+      setError(tr("nuevaErrorConexion"));
       setLoading(false);
     }
   }
@@ -61,16 +61,16 @@ export default function RegistroPage() {
           <span className="text-4xl font-extrabold text-foreground tracking-tight">
             Proclama<span className="text-accent">.</span>
           </span>
-          <p className="text-muted text-sm mt-1">Value your opinions.</p>
+          <p className="text-muted text-sm mt-1">{tr("tagline")}</p>
         </Link>
 
         <div className="bg-surface border border-line rounded-2xl p-8">
-          <h1 className="text-xl font-bold text-foreground mb-6">Create account</h1>
+          <h1 className="text-xl font-bold text-foreground mb-6">{tr("registerTitle")}</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-muted mb-1.5 uppercase tracking-wider">
-                Username
+                {tr("registerUsernameLabel")}
               </label>
               <input
                 type="text"
@@ -85,12 +85,12 @@ export default function RegistroPage() {
                 autoCorrect="off"
                 className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent"
               />
-              <p className="text-muted text-xs mt-1">Letters, numbers, underscores. 3–30 chars.</p>
+              <p className="text-muted text-xs mt-1">{tr("registerUsernameHint")}</p>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-muted mb-1.5 uppercase tracking-wider">
-                Email
+                {tr("profileEmailLabel")}
               </label>
               <input
                 type="email"
@@ -104,13 +104,13 @@ export default function RegistroPage() {
 
             <div>
               <label className="block text-xs font-semibold text-muted mb-1.5 uppercase tracking-wider">
-                Password
+                {tr("loginPasswordPlaceholder")}
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
+                placeholder={tr("registerPasswordHint")}
                 required
                 minLength={6}
                 className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent"
@@ -128,14 +128,14 @@ export default function RegistroPage() {
               disabled={loading || !username || !email || !password}
               className="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {loading ? "Creating account…" : "Create account"}
+              {loading ? tr("registerBtnLoading") : tr("registerBtn")}
             </button>
           </form>
 
           <p className="text-center text-muted text-sm mt-6">
-            Already have an account?{" "}
+            {tr("alreadyAccount")}{" "}
             <Link href="/login" className="text-accent hover:underline font-medium">
-              Sign in
+              {tr("signIn")}
             </Link>
           </p>
         </div>
