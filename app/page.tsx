@@ -24,7 +24,7 @@ export default async function Home() {
 
   // Try RPC first (true random + animal join)
   const { data: rpcData, error: rpcError } = await supabase.rpc("get_proclamas_random", {
-    p_limit: 10,
+    p_limit: 20,
     p_offset: 0,
     p_search: "",
   });
@@ -43,13 +43,13 @@ export default async function Home() {
       )
       .eq("publicada", true)
       .order("created_at", { ascending: false })
-      .range(0, 9);
+      .range(0, 19);
 
     totalCount = count ?? 0;
     proclamas = shuffle((data as Proclama[]) ?? []);
   }
 
-  const hasMore = totalCount > 10;
+  const hasMore = totalCount > 20;
   const totalReacciones = proclamas.reduce((sum, p) => {
     const r = p.reacciones ?? {};
     return sum + Object.values(r).reduce((a, b) => a + b, 0);

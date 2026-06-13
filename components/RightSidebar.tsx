@@ -119,7 +119,7 @@ export default function RightSidebar({
             )}
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-muted">🔥 Highest ♦️ Today</span>
+            <span className="text-muted">Highest ♦️ Today</span>
             <span className="text-foreground font-bold">
               {highestNebValue > 0 ? `♦️ ${formatNebulosas(highestNebValue)}` : "—"}
             </span>

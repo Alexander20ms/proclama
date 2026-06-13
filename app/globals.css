@@ -70,22 +70,22 @@ body {
   to   { filter: hue-rotate(360deg); }
 }
 @keyframes tier-rainbow-pulse {
-  0%, 100% { box-shadow: 0 0 18px rgba(255, 60, 60, 0.4),  0 0 36px rgba(60, 60, 255, 0.2);  }
-  33%       { box-shadow: 0 0 18px rgba(60, 200, 60, 0.4),  0 0 36px rgba(200, 60, 200, 0.2); }
-  66%       { box-shadow: 0 0 18px rgba(60, 100, 255, 0.4), 0 0 36px rgba(255, 160, 0, 0.2);  }
+  0%, 100% { box-shadow: 0 0 25px rgba(255, 60, 60, 0.7),  0 0 50px rgba(60, 60, 255, 0.4);  }
+  33%       { box-shadow: 0 0 25px rgba(60, 200, 60, 0.7),  0 0 50px rgba(200, 60, 200, 0.4); }
+  66%       { box-shadow: 0 0 25px rgba(60, 100, 255, 0.7), 0 0 50px rgba(255, 160, 0, 0.4);  }
 }
 @keyframes tier-halo {
   0%, 100% {
     box-shadow:
-      0 0 35px rgba(255,215,0,0.6),
-      0 0 60px rgba(255,215,0,0.4),
-      0 0 90px rgba(255,215,0,0.2);
+      0 0 40px rgba(255,215,0,0.9),
+      0 0 70px rgba(255,215,0,0.6),
+      0 0 100px rgba(255,215,0,0.3);
   }
   50% {
     box-shadow:
-      0 0 50px rgba(255,215,0,0.9),
-      0 0 80px rgba(255,215,0,0.6),
-      0 0 120px rgba(255,215,0,0.3);
+      0 0 60px rgba(255,215,0,1),
+      0 0 100px rgba(255,215,0,0.8),
+      0 0 140px rgba(255,215,0,0.4);
   }
 }
 @keyframes tier-gold-pulse {
@@ -96,13 +96,30 @@ body {
   0%   { transform: translateY(-150%); }
   100% { transform: translateY(250%);  }
 }
+@keyframes tier-2-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(59,130,246,0.6); }
+  50%       { box-shadow: 0 0 22px rgba(59,130,246,0.9); }
+}
+@keyframes tier-3-glow {
+  0%, 100% { box-shadow: 0 0 16px rgba(16,185,129,0.7); }
+  50%       { box-shadow: 0 0 30px rgba(16,185,129,1); }
+}
+@keyframes tier-4-gold-shimmer {
+  0%, 100% { box-shadow: 0 0 20px rgba(245,158,11,0.8); }
+  50%       { box-shadow: 0 0 38px rgba(245,158,11,1); }
+}
+@keyframes tier-5-silver-shimmer {
+  0%, 100% { box-shadow: 0 0 25px rgba(192,192,192,0.8); }
+  50%       { box-shadow: 0 0 45px rgba(192,192,192,1); }
+}
 
 /* ============================================================
    TIER 1 — CONFORMIST  ($5–$9)
    ============================================================ */
 .tier-1-card {
-  background: rgba(75,85,99,0.4) !important;
-  border: 1.5px solid #6B7280 !important;
+  background: #111111 !important;
+  border: 2px solid #6B7280 !important;
+  box-shadow: 0 0 8px rgba(107,114,128,0.5);
   border-radius: 20px !important;
 }
 .tier-1-name-badge {
@@ -127,10 +144,10 @@ body {
    TIER 2 — JUST A TIP  ($10–$29)
    ============================================================ */
 .tier-2-card {
-  background: rgba(59,130,246,0.2) !important;
-  border: 1.5px solid #3B82F6 !important;
-  box-shadow: 0 0 15px rgba(59,130,246,0.3);
+  background: #111111 !important;
+  border: 2px solid #3B82F6 !important;
   border-radius: 20px !important;
+  animation: tier-2-pulse 3s ease infinite;
 }
 .tier-2-name-badge {
   display: inline-flex;
@@ -156,10 +173,10 @@ body {
    ============================================================ */
 .tier-3-card {
   position: relative;
-  background: rgba(16,185,129,0.2) !important;
-  border: 1.5px solid #10B981 !important;
-  box-shadow: 0 0 20px rgba(16,185,129,0.35);
+  background: #111111 !important;
+  border: 2px solid #10B981 !important;
   border-radius: 20px !important;
+  animation: tier-3-glow 2.5s ease infinite;
 }
 .tier-3-card::before {
   content: none;
@@ -190,10 +207,10 @@ body {
    TIER 4 — MILLIONAIRE  ($100–$999)
    ============================================================ */
 .tier-4-card {
-  background: rgba(245,158,11,0.25) !important;
-  border: 1.5px solid #F59E0B !important;
-  box-shadow: 0 0 25px rgba(245,158,11,0.4);
+  background: #111111 !important;
+  border: 2px solid #F59E0B !important;
   border-radius: 20px !important;
+  animation: tier-4-gold-shimmer 2s ease infinite;
 }
 .tier-4-name-badge {
   display: inline-flex;
@@ -217,11 +234,11 @@ body {
    ============================================================ */
 .tier-5-card {
   position: relative;
-  background: rgba(192,192,192,0.2) !important;
-  border: 1.5px solid #C0C0C0 !important;
-  box-shadow: 0 0 30px rgba(192,192,192,0.45);
+  background: #111111 !important;
+  border: 2px solid #C0C0C0 !important;
   overflow: hidden;
   border-radius: 20px !important;
+  animation: tier-5-silver-shimmer 2.5s ease infinite;
 }
 /* Shimmer sweep across the left border */
 .tier-5-card::before {
@@ -284,8 +301,8 @@ body {
    ============================================================ */
 .tier-6-card {
   position: relative;
-  background: rgba(168,85,247,0.2) !important;
-  animation: tier-rainbow-pulse 3s ease infinite;
+  background: #111111 !important;
+  animation: tier-rainbow-pulse 2s ease infinite;
   overflow: hidden;
   border-radius: 20px !important;
 }
@@ -358,13 +375,10 @@ body {
    ============================================================ */
 .tier-7-card {
   position: relative;
-  background: rgba(255,215,0,0.25) !important;
-  border: 2px solid #FFD700 !important;
-  animation: tier-halo 2s ease infinite;
+  background: #111111 !important;
+  border: 3px solid #FFD700 !important;
+  animation: tier-halo 1.8s ease infinite;
   border-radius: 20px !important;
-}
-.dark .tier-7-card {
-  background: rgba(255,215,0,0.12) !important;
 }
 .tier-7-header {
   text-align: center;

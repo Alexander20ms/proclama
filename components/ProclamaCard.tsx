@@ -47,6 +47,10 @@ function AnimalEmoji({
   );
 }
 
+function stripEmojis(s: string): string {
+  return s.replace(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu, "").trim();
+}
+
 function formatDateTime(dateStr: string): string {
   return new Date(dateStr).toLocaleString("en-US", {
     month: "short",
@@ -146,7 +150,7 @@ export default function ProclamaCard({
                   tier.level === 7 ? "tier-7-author text-yellow-400" : "text-foreground"
                 }`}
               >
-                {proclama.autor}
+                {stripEmojis(proclama.autor)}
               </Link>
             ) : (
               <span
@@ -154,7 +158,7 @@ export default function ProclamaCard({
                   tier.level === 7 ? "tier-7-author text-yellow-400" : "text-foreground"
                 }`}
               >
-                {proclama.autor}
+                {stripEmojis(proclama.autor)}
               </span>
             )}
 

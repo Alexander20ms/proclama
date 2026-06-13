@@ -106,7 +106,7 @@ export default function LeftSidebar() {
       {user && nebulosas !== null && (
         <Link
           href="/billetera"
-          className="mx-3 flex items-center justify-center gap-1.5 bg-red-900 border border-red-500 text-red-300 rounded-xl px-4 py-2 text-sm font-semibold hover:bg-red-800 transition-colors"
+          className="mx-3 flex items-center justify-center gap-1.5 bg-[#1F2937] border border-[#374151] text-white rounded-xl px-4 py-2 text-sm font-semibold hover:bg-[#374151] transition-colors"
         >
           ♦️ {nebulosas.toLocaleString()}
         </Link>

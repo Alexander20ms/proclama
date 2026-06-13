@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import ProclamaCard, { type Proclama } from "./ProclamaCard";
@@ -32,11 +32,9 @@ export default function HomeClient({
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
 
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
   const fetchPage = useCallback(async (p: number, reset = false) => {
     setLoading(true);
-    const params = new URLSearchParams({ page: String(p), limit: "10" });
+    const params = new URLSearchParams({ page: String(p), limit: "20" });
 
     try {
       const res = await fetch(`/api/proclamas?${params}`);
@@ -60,20 +58,17 @@ export default function HomeClient({
     }
   }, []);
 
-  // Infinite scroll via IntersectionObserver
+  // Infinite scroll — trigger at 80% of page scroll
   useEffect(() => {
-    const el = sentinelRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading) {
-          fetchPage(page);
-        }
-      },
-      { threshold: 0.1, rootMargin: "200px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
+    function handleScroll() {
+      const scrolled = window.scrollY + window.innerHeight;
+      const total = document.documentElement.scrollHeight;
+      if (total > 0 && scrolled / total >= 0.8 && hasMore && !loading) {
+        fetchPage(page);
+      }
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, loading, page, fetchPage]);
 
   return (
@@ -143,9 +138,6 @@ export default function HomeClient({
                   />
                 ))}
 
-                {/* Sentinel for infinite scroll */}
-                <div ref={sentinelRef} className="h-4" />
-
                 {loading && (
                   <div className="flex justify-center py-6">
                     <div className="w-6 h-6 border-2 border-line border-t-accent rounded-full animate-spin" />
@@ -153,8 +145,8 @@ export default function HomeClient({
                 )}
 
                 {!hasMore && proclamas.length > 0 && (
-                  <p className="text-center text-muted text-xs py-8">
-                    — {tr("footer")} —
+                  <p className="text-center text-muted text-sm py-10">
+                    You&apos;ve seen everything 🌌
                   </p>
                 )}
               </>
