@@ -9,6 +9,39 @@ import UserMenu from "./UserMenu";
 
 const HOME_URL = "https://proclama.vercel.app";
 
+const FRASES = [
+  "Your words outlive you.",
+  "Silence is cheap. Proclamations are forever.",
+  "What do you believe in enough to pay for?",
+  "The world is listening.",
+  "One dollar. One truth. Forever.",
+  "Opinions fade. Proclamations don't.",
+  "Be remembered for what you truly believe.",
+  "Your truth deserves a permanent home.",
+  "Say it loud. Say it forever.",
+  "Not a tweet. A proclamation.",
+  "What would you pay to be heard?",
+  "Every belief has a price. What's yours?",
+  "The wall never forgets.",
+  "Make your mark on the world.",
+  "Words are power. Proclamations are legacy.",
+  "Dare to declare.",
+  "Your conviction, immortalized.",
+  "What you believe matters. Prove it.",
+  "The boldest voices pay to be heard.",
+  "Truth costs something. That's what makes it true.",
+  "Don't just think it. Proclaim it.",
+  "Leave something real behind.",
+  "A proclamation is a promise to the world.",
+  "Value your opinions. Literally.",
+  "The loudest belief wins.",
+  "Stand for something. Pay for it.",
+  "Your voice. Your price. Your legacy.",
+  "What's worth a dollar to you?",
+  "Beliefs without cost are just thoughts.",
+  "Make today's truth permanent."
+];
+
 export default function LeftSidebar() {
   const { tr, toggleTheme, theme } = useLanguage();
   const { user } = useAuth();
@@ -32,6 +65,8 @@ export default function LeftSidebar() {
   function handlePublish() {
     window.location.href = user ? "/nueva" : "/login?next=/nueva";
   }
+
+  const fraseDelDia = FRASES[new Date().getDate() % FRASES.length];
 
   return (
     <div className="flex flex-col gap-2 py-4">
@@ -59,22 +94,21 @@ export default function LeftSidebar() {
         {tr("publishBtn")}
       </button>
 
-      {/* Home button — same style as Publish */}
+      {/* Home button */}
       <button
         onClick={() => { window.location.href = HOME_URL; }}
         className="mx-3 bg-accent text-white font-bold px-4 py-2.5 rounded-xl hover:bg-blue-500 transition-colors text-sm text-center"
       >
-        🏠 Home
+        Home
       </button>
 
       {/* Wallet link — only when logged in */}
       {user && nebulosas !== null && (
         <Link
           href="/billetera"
-          className="mx-3 flex items-center justify-center gap-1.5 border border-line rounded-xl px-4 py-2 text-sm font-semibold text-foreground hover:bg-hover transition-colors"
+          className="mx-3 flex items-center justify-center gap-1.5 bg-red-900 border border-red-500 text-red-300 rounded-xl px-4 py-2 text-sm font-semibold hover:bg-red-800 transition-colors"
         >
-          <span>♦️</span>
-          <span>{nebulosas.toLocaleString()} nebulas</span>
+          ♦️ {nebulosas.toLocaleString()}
         </Link>
       )}
 
@@ -82,10 +116,17 @@ export default function LeftSidebar() {
       <div className="mt-4 mx-3 border-t border-line pt-4">
         <button
           onClick={toggleTheme}
-          className="w-full text-muted hover:text-foreground text-xs border border-line py-1.5 rounded-lg transition-colors"
+          className={`w-full text-xs font-bold py-1.5 rounded-lg transition-colors border ${
+            theme === "dark"
+              ? "bg-white text-black border-white hover:bg-gray-100"
+              : "bg-black text-white border-black hover:bg-gray-900"
+          }`}
         >
-          {theme === "dark" ? `☀️ ${tr("lightMode")}` : `🌙 ${tr("darkMode")}`}
+          {theme === "dark" ? "Dark" : "Light"}
         </button>
+        <p className="text-center text-xs italic mt-3 px-1 leading-snug" style={{ color: "#6B7280" }}>
+          {fraseDelDia}
+        </p>
       </div>
     </div>
   );

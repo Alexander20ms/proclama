@@ -271,7 +271,7 @@ function BilleteraContent() {
         {/* Recharge table */}
         <div className="bg-surface border border-line rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-line">
-            <h2 className="text-foreground font-bold text-lg">Recharge Nebulas ♦️</h2>
+            <h2 className="text-foreground font-bold text-lg">Recharge Nebulas</h2>
           </div>
           <div className="divide-y divide-line">
             {PACKAGES.map((pkg) => (
@@ -291,11 +291,7 @@ function BilleteraContent() {
                 <button
                   onClick={() => handleRecharge(pkg.id)}
                   disabled={!!recargarLoading}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors disabled:opacity-60 ${
-                    pkg.best
-                      ? "bg-accent text-white hover:bg-blue-500"
-                      : "bg-line text-foreground hover:bg-hover"
-                  }`}
+                  className="px-4 py-2 rounded-xl text-sm font-bold transition-colors disabled:opacity-60 bg-gray-800 text-white hover:bg-gray-700"
                 >
                   {recargarLoading === pkg.id ? "…" : "Buy"}
                 </button>

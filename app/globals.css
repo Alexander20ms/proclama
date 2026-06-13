@@ -77,15 +77,15 @@ body {
 @keyframes tier-halo {
   0%, 100% {
     box-shadow:
-      0 0 25px rgba(255,215,0,0.5),
-      0 0 50px rgba(255,215,0,0.3),
-      0 0 80px rgba(255,215,0,0.15);
+      0 0 35px rgba(255,215,0,0.6),
+      0 0 60px rgba(255,215,0,0.4),
+      0 0 90px rgba(255,215,0,0.2);
   }
   50% {
     box-shadow:
-      0 0 40px rgba(255,215,0,0.8),
-      0 0 70px rgba(255,215,0,0.5),
-      0 0 110px rgba(255,215,0,0.25);
+      0 0 50px rgba(255,215,0,0.9),
+      0 0 80px rgba(255,215,0,0.6),
+      0 0 120px rgba(255,215,0,0.3);
   }
 }
 @keyframes tier-gold-pulse {
@@ -101,7 +101,8 @@ body {
    TIER 1 — CONFORMIST  ($5–$9)
    ============================================================ */
 .tier-1-card {
-  border-left: 2px solid #444 !important;
+  background: rgba(75,85,99,0.4) !important;
+  border: 1.5px solid #6B7280 !important;
   border-radius: 20px !important;
 }
 .tier-1-name-badge {
@@ -126,8 +127,9 @@ body {
    TIER 2 — JUST A TIP  ($10–$29)
    ============================================================ */
 .tier-2-card {
-  border-left: 2px solid rgba(59, 130, 246, 0.65) !important;
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+  background: rgba(59,130,246,0.2) !important;
+  border: 1.5px solid #3B82F6 !important;
+  box-shadow: 0 0 15px rgba(59,130,246,0.3);
   border-radius: 20px !important;
 }
 .tier-2-name-badge {
@@ -154,26 +156,13 @@ body {
    ============================================================ */
 .tier-3-card {
   position: relative;
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  background: rgba(16,185,129,0.2) !important;
+  border: 1.5px solid #10B981 !important;
+  box-shadow: 0 0 20px rgba(16,185,129,0.35);
   border-radius: 20px !important;
 }
-/* Gradient border via mask technique */
 .tier-3-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 1.5px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #10B981, #3B82F6, #10B981);
-  background-size: 200% 200%;
-  animation: tier-gradient-flow 3s ease infinite;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 0;
+  content: none;
 }
 .tier-3-name-badge {
   display: inline-flex;
@@ -201,15 +190,10 @@ body {
    TIER 4 — MILLIONAIRE  ($100–$999)
    ============================================================ */
 .tier-4-card {
+  background: rgba(245,158,11,0.25) !important;
   border: 1.5px solid #F59E0B !important;
-  box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 25px rgba(245,158,11,0.4);
   border-radius: 20px !important;
-}
-.dark .tier-4-card {
-  background: linear-gradient(135deg, #1a1500 0%, #111111 100%) !important;
-}
-.dark .tier-4-card:hover {
-  background: linear-gradient(135deg, #211b00 0%, #181818 100%) !important;
 }
 .tier-4-name-badge {
   display: inline-flex;
@@ -233,16 +217,11 @@ body {
    ============================================================ */
 .tier-5-card {
   position: relative;
-  border: 1.5px solid rgba(192, 192, 192, 0.5) !important;
-  box-shadow: 0 0 40px rgba(192, 192, 192, 0.45);
+  background: rgba(192,192,192,0.2) !important;
+  border: 1.5px solid #C0C0C0 !important;
+  box-shadow: 0 0 30px rgba(192,192,192,0.45);
   overflow: hidden;
   border-radius: 20px !important;
-}
-.dark .tier-5-card {
-  background: linear-gradient(135deg, #0d0d1a 0%, #111111 100%) !important;
-}
-.dark .tier-5-card:hover {
-  background: linear-gradient(135deg, #131325 0%, #181818 100%) !important;
 }
 /* Shimmer sweep across the left border */
 .tier-5-card::before {
@@ -305,6 +284,7 @@ body {
    ============================================================ */
 .tier-6-card {
   position: relative;
+  background: rgba(168,85,247,0.2) !important;
   animation: tier-rainbow-pulse 3s ease infinite;
   overflow: hidden;
   border-radius: 20px !important;
@@ -378,15 +358,13 @@ body {
    ============================================================ */
 .tier-7-card {
   position: relative;
+  background: rgba(255,215,0,0.25) !important;
   border: 2px solid #FFD700 !important;
   animation: tier-halo 2s ease infinite;
   border-radius: 20px !important;
 }
 .dark .tier-7-card {
-  background: #060606 !important;
-}
-.dark .tier-7-card:hover {
-  background: #0c0c0c !important;
+  background: rgba(255,215,0,0.12) !important;
 }
 .tier-7-header {
   text-align: center;
