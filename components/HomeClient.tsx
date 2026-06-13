@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import ProclamaCard, { type Proclama } from "./ProclamaCard";
 import LeftSidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
 import UserMenu from "./UserMenu";
+import Link from "next/link";
 
 type Props = {
   initialProclamaas: Proclama[];
@@ -24,65 +24,60 @@ export default function HomeClient({
   const { tr } = useLanguage();
   const { user } = useAuth();
 
+  // Source of truth: all proclamas loaded from server
+  const [allProclamaas, setAllProclamaas] = useState<Proclama[]>(initialProclamaas);
+  // Displayed proclamas: filtered subset of allProclamaas
   const [proclamas, setProclamaas] = useState<Proclama[]>(initialProclamaas);
+
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(2);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
-
   const [search, setSearch] = useState("");
 
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const isFirstRender = useRef(true);
-  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // Debounce search
+  // Client-side filter: never fetch due to search
   useEffect(() => {
-    if (searchTimer.current) clearTimeout(searchTimer.current);
-    searchTimer.current = setTimeout(() => setDebouncedSearch(search), 400);
-    return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
-  }, [search]);
-
-  const fetchPage = useCallback(
-    async (p: number, reset = false) => {
-      setLoading(true);
-      const params = new URLSearchParams({ page: String(p), limit: "10" });
-      if (debouncedSearch) params.set("q", debouncedSearch);
-
-      try {
-        const res = await fetch(`/api/proclamas?${params}`);
-        const data = await res.json();
-        const newProclamaas: Proclama[] = data.proclamas ?? [];
-
-        if (reset) {
-          setProclamaas(newProclamaas);
-          setNewIds(new Set());
-        } else {
-          const ids = new Set(newProclamaas.map((p: Proclama) => p.id));
-          setNewIds(ids);
-          setProclamaas((prev) => [...prev, ...newProclamaas]);
-          setTimeout(() => setNewIds(new Set()), 600);
-        }
-
-        setPage(p + 1);
-        setHasMore(data.hasMore ?? false);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [debouncedSearch]
-  );
-
-  // Reset on search change
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
+    if (!search.trim()) {
+      setProclamaas(allProclamaas);
       return;
     }
-    setPage(1);
-    fetchPage(1, true);
-  }, [debouncedSearch, fetchPage]);
+    const q = search.toLowerCase();
+    setProclamaas(
+      allProclamaas.filter(
+        (p) =>
+          p.texto?.toLowerCase().includes(q) ||
+          p.autor?.toLowerCase().includes(q)
+      )
+    );
+  }, [search, allProclamaas]);
+
+  const fetchPage = useCallback(async (p: number, reset = false) => {
+    setLoading(true);
+    const params = new URLSearchParams({ page: String(p), limit: "10" });
+
+    try {
+      const res = await fetch(`/api/proclamas?${params}`);
+      const data = await res.json();
+      const newProclamaas: Proclama[] = data.proclamas ?? [];
+
+      if (reset) {
+        setAllProclamaas(newProclamaas);
+        setNewIds(new Set());
+      } else {
+        const ids = new Set(newProclamaas.map((p: Proclama) => p.id));
+        setNewIds(ids);
+        setAllProclamaas((prev) => [...prev, ...newProclamaas]);
+        setTimeout(() => setNewIds(new Set()), 600);
+      }
+
+      setPage(p + 1);
+      setHasMore(data.hasMore ?? false);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Infinite scroll via IntersectionObserver
   useEffect(() => {
@@ -100,14 +95,24 @@ export default function HomeClient({
     return () => observer.disconnect();
   }, [hasMore, loading, page, fetchPage]);
 
+  const resetFeed = useCallback(async () => {
+    setSearch("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setPage(1);
+    await fetchPage(1, true);
+  }, [fetchPage]);
+
   return (
     <div className="min-h-screen bg-bg">
       {/* Mobile header */}
       <header className="md:hidden sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-line">
         <div className="px-4 py-3 flex items-center justify-between gap-3">
-          <span className="text-xl font-extrabold text-foreground">
+          <button
+            onClick={resetFeed}
+            className="text-xl font-extrabold text-foreground hover:opacity-75 transition-opacity"
+          >
             Proclama<span className="text-accent">.</span>
-          </span>
+          </button>
           <div className="flex items-center gap-2 shrink-0">
             <UserMenu />
             <Link
@@ -138,21 +143,21 @@ export default function HomeClient({
             <LeftSidebar
               search={search}
               onSearchChange={setSearch}
+              onReset={resetFeed}
             />
           </div>
         </aside>
 
         {/* Center feed */}
         <main className="flex-1 min-w-0 max-w-[600px] border-x border-line">
-          {/* Feed */}
           <div className="px-3 py-4">
             {proclamas.length === 0 && !loading ? (
               <div className="text-center py-28 px-4">
                 <p className="text-5xl mb-5">📣</p>
                 <h2 className="text-2xl font-bold text-foreground mb-2">
-                  {debouncedSearch ? tr("noResults") : tr("muroEmpty")}
+                  {search ? tr("noResults") : tr("muroEmpty")}
                 </h2>
-                {!debouncedSearch && (
+                {!search && (
                   <Link
                     href="/nueva"
                     className="mt-6 inline-block bg-accent text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-500 transition-colors"
@@ -174,14 +179,12 @@ export default function HomeClient({
                 {/* Sentinel for infinite scroll */}
                 <div ref={sentinelRef} className="h-4" />
 
-                {/* Loading spinner */}
                 {loading && (
                   <div className="flex justify-center py-6">
                     <div className="w-6 h-6 border-2 border-line border-t-accent rounded-full animate-spin" />
                   </div>
                 )}
 
-                {/* End of feed */}
                 {!hasMore && proclamas.length > 0 && (
                   <p className="text-center text-muted text-xs py-8">
                     — {tr("footer")} —

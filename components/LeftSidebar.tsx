@@ -10,9 +10,10 @@ import UserMenu from "./UserMenu";
 type Props = {
   search: string;
   onSearchChange: (q: string) => void;
+  onReset?: () => void;
 };
 
-export default function LeftSidebar({ search, onSearchChange }: Props) {
+export default function LeftSidebar({ search, onSearchChange, onReset }: Props) {
   const { tr, toggleTheme, theme } = useLanguage();
   const { user } = useAuth();
   const [nebulosas, setNebulosas] = useState<number | null>(null);
@@ -39,17 +40,29 @@ export default function LeftSidebar({ search, onSearchChange }: Props) {
   return (
     <div className="flex flex-col gap-2 py-4">
       {/* Logo + UserMenu */}
-      <div className="px-3 mb-2 flex items-start justify-between gap-2">
+      <div className="px-3 mb-1 flex items-start justify-between gap-2">
         <div>
-          <span className="text-2xl font-extrabold text-foreground tracking-tight">
+          <button
+            onClick={onReset}
+            className="text-2xl font-extrabold text-foreground tracking-tight hover:opacity-75 transition-opacity text-left"
+          >
             Proclama<span className="text-accent">.</span>
-          </span>
+          </button>
           <p className="text-muted text-xs mt-0.5">{tr("tagline")}</p>
         </div>
         <div className="pt-0.5">
           <UserMenu />
         </div>
       </div>
+
+      {/* Home button */}
+      <button
+        onClick={onReset}
+        className="mx-3 flex items-center gap-1.5 text-xs text-muted hover:text-foreground transition-colors py-1"
+      >
+        <span>🏠</span>
+        <span>Home</span>
+      </button>
 
       {/* Publish button */}
       <button
