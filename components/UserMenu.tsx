@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { getAnimal } from "@/lib/animals";
 
 export default function UserMenu() {
   const { user, profile, loading, signOut } = useAuth();
@@ -34,17 +35,17 @@ export default function UserMenu() {
     );
   }
 
-  const initial = profile.username[0]?.toUpperCase() ?? "?";
+  const animal = getAnimal(profile.username, profile.animal);
 
   return (
     <div ref={ref} className="relative shrink-0">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm transition-opacity hover:opacity-80"
-        style={{ backgroundColor: profile.color }}
+        className="text-[28px] leading-none transition-transform duration-300 hover:scale-125"
         title={profile.username}
+        aria-label={profile.username}
       >
-        {initial}
+        {animal}
       </button>
 
       {open && (
