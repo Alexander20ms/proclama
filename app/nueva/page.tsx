@@ -6,58 +6,33 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 
-type Categoria = {
-  id: string;
-  nombre_es: string;
-  nombre_en: string;
-  emoji: string;
-};
-
 const MONTOS_PRESET = [1, 2, 5, 10, 20, 50];
 
 export default function NuevaPage() {
-  const { tr, lang } = useLanguage();
+  const { tr } = useLanguage();
   const { user, profile, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [texto, setTexto] = useState("");
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [categoriaId, setCategoriaId] = useState("");
   const [montoSel, setMontoSel] = useState<number | "custom">(1);
   const [montoCustom, setMontoCustom] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Auth guard
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/login?next=/nueva&msg=login-required");
     }
   }, [authLoading, user, router]);
 
-  useEffect(() => {
-    fetch("/api/categorias")
-      .then((r) => r.json())
-      .then((data) => {
-        setCategorias(data.categorias ?? []);
-        if (data.categorias?.length) setCategoriaId(data.categorias[0].id);
-      });
-  }, []);
-
   const montoFinal =
     montoSel === "custom" ? parseFloat(montoCustom) || 0 : montoSel;
-
-  const nombreCategoria = (cat: Categoria) =>
-    lang === "es"
-      ? `${cat.emoji} ${cat.nombre_es}`
-      : `${cat.emoji} ${cat.nombre_en}`;
 
   const autor = profile?.username ?? "";
 
   const puedeEnviar =
     texto.trim().length > 0 &&
     autor.trim().length > 0 &&
-    categoriaId &&
     montoFinal >= 1 &&
     !loading;
 
@@ -67,13 +42,6 @@ export default function NuevaPage() {
     setLoading(true);
     setError("");
 
-    const cat = categorias.find((c) => c.id === categoriaId);
-    const categoriaNombre = cat
-      ? lang === "es"
-        ? cat.nombre_es
-        : cat.nombre_en
-      : "";
-
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
@@ -82,7 +50,7 @@ export default function NuevaPage() {
           texto: texto.trim(),
           autor: autor.trim(),
           monto: montoFinal,
-          categoria: categoriaNombre,
+          categoria: "General",
           user_id: user.id,
         }),
       });
@@ -155,7 +123,7 @@ export default function NuevaPage() {
                     texto.length >= 260 ? "text-orange-400" : "text-muted"
                   }`}
                 >
-                  {texto.length}/280
+                  {280 - texto.length} {tr("charactersLeft")}
                 </span>
               </div>
             </div>
@@ -179,29 +147,6 @@ export default function NuevaPage() {
                 >
                   {tr("profileCambiar")}
                 </Link>
-              </div>
-            </div>
-
-            {/* Categoría */}
-            <div>
-              <label className="block text-sm font-semibold text-muted mb-2">
-                {tr("nuevaCatLabel")}
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {categorias.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setCategoriaId(cat.id)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                      categoriaId === cat.id
-                        ? "bg-accent text-white"
-                        : "bg-line text-muted hover:bg-hover hover:text-foreground"
-                    }`}
-                  >
-                    {nombreCategoria(cat)}
-                  </button>
-                ))}
               </div>
             </div>
 

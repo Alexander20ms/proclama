@@ -17,7 +17,6 @@ type MiProclama = {
   id: string;
   texto: string;
   monto: number;
-  categoria: string;
   created_at: string;
 };
 
@@ -26,7 +25,7 @@ type Tab = "info" | "proclamas";
 export default function PerfilPage() {
   const router = useRouter();
   const { user, profile, loading: authLoading, signOut, refreshProfile } = useAuth();
-  const { tr, lang } = useLanguage();
+  const { tr } = useLanguage();
 
   const [tab, setTab] = useState<Tab>("info");
   const [misProclamas, setMisProclamaas] = useState<MiProclama[]>([]);
@@ -35,23 +34,20 @@ export default function PerfilPage() {
   const [savingColor, setSavingColor] = useState(false);
   const [colorSaved, setColorSaved] = useState(false);
 
-  // Auth guard
   useEffect(() => {
     if (!authLoading && !user) router.push("/login?next=/perfil");
   }, [authLoading, user, router]);
 
-  // Sync color from profile
   useEffect(() => {
     if (profile?.color) setSelectedColor(profile.color);
   }, [profile?.color]);
 
-  // Load proclamas on tab switch
   useEffect(() => {
     if (tab === "proclamas" && user && misProclamas.length === 0) {
       setLoadingProclamaas(true);
       supabase
         .from("proclamas")
-        .select("id, texto, monto, categoria, created_at")
+        .select("id, texto, monto, created_at")
         .eq("user_id", user.id)
         .eq("publicada", true)
         .order("created_at", { ascending: false })
@@ -199,7 +195,7 @@ export default function PerfilPage() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-muted text-sm">
-                    {misProclamas.length} proclama{misProclamas.length !== 1 ? "s" : ""}
+                    {misProclamas.length} proclamation{misProclamas.length !== 1 ? "s" : ""}
                   </p>
                   <p className="text-muted text-sm">
                     {tr("profileTotalSpent")}{" "}
@@ -217,15 +213,17 @@ export default function PerfilPage() {
                         &ldquo;{p.texto}&rdquo;
                       </p>
                       <div className="flex items-center gap-3 mt-2 text-xs text-muted">
-                        <span className="px-2 py-0.5 bg-line rounded-full">{p.categoria}</span>
                         <span className="text-accent font-bold">
                           ${(p.monto / 100).toFixed(0)}
                         </span>
                         <span>
-                          {new Date(p.created_at).toLocaleDateString(
-                            lang === "es" ? "es-ES" : "en-US",
-                            { month: "short", day: "numeric", year: "numeric" }
-                          )}
+                          {new Date(p.created_at).toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
                         </span>
                       </div>
                     </Link>

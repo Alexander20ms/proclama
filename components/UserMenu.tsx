@@ -58,13 +58,13 @@ export default function UserMenu() {
             onClick={() => setOpen(false)}
             className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-hover transition-colors"
           >
-            <span>👤</span> Mi perfil
+            <span>👤</span> My profile
           </Link>
           <button
             onClick={() => { signOut(); setOpen(false); }}
             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-hover transition-colors"
           >
-            <span>🚪</span> Cerrar sesión
+            <span>🚪</span> Log out
           </button>
         </div>
       )}

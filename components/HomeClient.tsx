@@ -10,24 +10,20 @@ import RightSidebar from "./RightSidebar";
 import UserMenu from "./UserMenu";
 
 type SortKey = "monto" | "reacciones";
-type CategoriaItem = { nombre_es: string; nombre_en: string; emoji: string };
 
 type Props = {
   initialProclamaas: Proclama[];
   totalCount: number;
   hasMore: boolean;
-  categorias: CategoriaItem[];
-  totalReacciones: number;
+  totalReacciones?: number;
 };
 
 export default function HomeClient({
   initialProclamaas,
   totalCount,
   hasMore: initialHasMore,
-  categorias: initialCategorias,
-  totalReacciones,
 }: Props) {
-  const { tr, lang } = useLanguage();
+  const { tr } = useLanguage();
   const { user } = useAuth();
 
   const [proclamas, setProclamaas] = useState<Proclama[]>(initialProclamaas);
@@ -36,10 +32,6 @@ export default function HomeClient({
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
 
-  // Categories: start with SSR data, then fetch fresh client-side
-  const [categorias, setCategorias] = useState<CategoriaItem[]>(initialCategorias);
-
-  const [categoria, setCategoria] = useState("all");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("monto");
 
@@ -47,27 +39,6 @@ export default function HomeClient({
   const isFirstRender = useRef(true);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
-
-  // Fetch categories client-side on mount (fixes SSR fetch failures)
-  useEffect(() => {
-    fetch("/api/categorias")
-      .then((r) => r.json())
-      .then((data) => {
-        const cats = (data.categorias ?? []) as Array<{
-          nombre_es: string;
-          nombre_en: string;
-          emoji: string;
-        }>;
-        if (cats.length > 0) {
-          setCategorias(cats.map((c) => ({
-            nombre_es: c.nombre_es,
-            nombre_en: c.nombre_en,
-            emoji: c.emoji,
-          })));
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   // Debounce search
   useEffect(() => {
@@ -80,7 +51,6 @@ export default function HomeClient({
     async (p: number, reset = false) => {
       setLoading(true);
       const params = new URLSearchParams({ page: String(p), limit: "10", sort });
-      if (categoria !== "all") params.set("categoria", categoria);
       if (debouncedSearch) params.set("q", debouncedSearch);
 
       try {
@@ -95,7 +65,6 @@ export default function HomeClient({
           const ids = new Set(newProclamaas.map((p: Proclama) => p.id));
           setNewIds(ids);
           setProclamaas((prev) => [...prev, ...newProclamaas]);
-          // Clear animation flag after 600ms
           setTimeout(() => setNewIds(new Set()), 600);
         }
 
@@ -105,7 +74,7 @@ export default function HomeClient({
         setLoading(false);
       }
     },
-    [categoria, debouncedSearch, sort]
+    [debouncedSearch, sort]
   );
 
   // Reset on filter change
@@ -116,7 +85,7 @@ export default function HomeClient({
     }
     setPage(1);
     fetchPage(1, true);
-  }, [categoria, debouncedSearch, sort, fetchPage]);
+  }, [debouncedSearch, sort, fetchPage]);
 
   // Infinite scroll via IntersectionObserver
   useEffect(() => {
@@ -167,32 +136,6 @@ export default function HomeClient({
             className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-sm text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent"
           />
         </div>
-        {/* Mobile category filter */}
-        <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide">
-          <button
-            onClick={() => setCategoria("all")}
-            className={`shrink-0 text-xs font-semibold px-3 py-1 rounded-full transition-colors ${
-              categoria === "all"
-                ? "bg-accent text-white"
-                : "bg-line text-muted"
-            }`}
-          >
-            {tr("allShort")}
-          </button>
-          {categorias.map((c) => (
-            <button
-              key={c.nombre_es}
-              onClick={() => setCategoria(c.nombre_es)}
-              className={`shrink-0 text-xs font-semibold px-3 py-1 rounded-full transition-colors ${
-                categoria === c.nombre_es
-                  ? "bg-accent text-white"
-                  : "bg-line text-muted"
-              }`}
-            >
-              {c.emoji} {lang === "es" ? c.nombre_es : c.nombre_en}
-            </button>
-          ))}
-        </div>
       </header>
 
       {/* 3-column layout */}
@@ -201,11 +144,6 @@ export default function HomeClient({
         <aside className="hidden md:block w-[240px] shrink-0">
           <div className="sticky top-0 max-h-screen overflow-y-auto">
             <LeftSidebar
-              categorias={categorias}
-              totalProclamaas={totalCount}
-              totalReacciones={totalReacciones}
-              selectedCategoria={categoria}
-              onCategoriaChange={setCategoria}
               search={search}
               onSearchChange={setSearch}
             />
@@ -238,11 +176,9 @@ export default function HomeClient({
             <div className="text-center py-28 px-4">
               <p className="text-5xl mb-5">📣</p>
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                {debouncedSearch || categoria !== "all"
-                  ? tr("noResults")
-                  : tr("muroEmpty")}
+                {debouncedSearch ? tr("noResults") : tr("muroEmpty")}
               </h2>
-              {!debouncedSearch && categoria === "all" && (
+              {!debouncedSearch && (
                 <Link
                   href="/nueva"
                   className="mt-6 inline-block bg-accent text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-500 transition-colors"

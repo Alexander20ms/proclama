@@ -31,7 +31,7 @@ type Props = {
 };
 
 export default function RespuestaThread({ proclamaId, initialRespuestas }: Props) {
-  const { tr, lang } = useLanguage();
+  const { tr } = useLanguage();
   const [respuestas, setRespuestas] = useState<Respuesta[]>(initialRespuestas ?? []);
   const [loading, setLoading] = useState(!initialRespuestas);
   const [showForm, setShowForm] = useState(false);
@@ -99,10 +99,13 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
           {respuestas.length > 0 && (
             <div className="relative ml-5 pl-6 border-l-2 border-line">
               {respuestas.map((r) => {
-                const fecha = new Date(r.created_at).toLocaleDateString(
-                  lang === "es" ? "es-ES" : "en-US",
-                  { month: "short", day: "numeric" }
-                );
+                const fecha = new Date(r.created_at).toLocaleString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                });
                 return (
                   <div key={r.id} className="flex gap-3 py-3">
                     <Avatar name={r.autor} size="sm" />

@@ -36,6 +36,16 @@ function Avatar({ name }: { name: string }) {
   );
 }
 
+function formatDateTime(dateStr: string): string {
+  return new Date(dateStr).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 export default function ProclamaCard({
   proclama,
   isNew = false,
@@ -43,7 +53,7 @@ export default function ProclamaCard({
   proclama: Proclama;
   isNew?: boolean;
 }) {
-  const { lang, tr } = useLanguage();
+  const { tr } = useLanguage();
   const [threadOpen, setThreadOpen] = useState(false);
 
   const monto = (proclama.monto / 100).toLocaleString("en-US", {
@@ -52,10 +62,7 @@ export default function ProclamaCard({
     minimumFractionDigits: 0,
   });
 
-  const fecha = new Date(proclama.created_at).toLocaleDateString(
-    lang === "es" ? "es-ES" : "en-US",
-    { month: "short", day: "numeric" }
-  );
+  const fecha = formatDateTime(proclama.created_at);
 
   return (
     <article
@@ -90,9 +97,6 @@ export default function ProclamaCard({
               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent">
                 {monto}
               </span>
-              <span className="text-xs text-muted font-medium px-2 py-0.5 rounded-full bg-line">
-                {proclama.categoria}
-              </span>
             </div>
           </div>
 
@@ -118,7 +122,6 @@ export default function ProclamaCard({
               }`}
               title={tr("apoyoTitle")}
             >
-              {/* Comment bubble icon */}
               <svg
                 viewBox="0 0 24 24"
                 className="w-[18px] h-[18px] fill-none stroke-current stroke-2"

@@ -23,6 +23,16 @@ function Avatar({ name, size = "lg" }: { name: string; size?: "sm" | "lg" }) {
   );
 }
 
+function formatDateTime(dateStr: string): string {
+  return new Date(dateStr).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 export default function ProclamaPageClient({
   proclama,
   initialRespuestas,
@@ -30,7 +40,7 @@ export default function ProclamaPageClient({
   proclama: Proclama;
   initialRespuestas: Respuesta[];
 }) {
-  const { lang, tr, toggleTheme, theme, setLang } = useLanguage();
+  const { tr, toggleTheme, theme } = useLanguage();
   const [successMsg, setSuccessMsg] = useState(false);
 
   useEffect(() => {
@@ -49,10 +59,7 @@ export default function ProclamaPageClient({
     minimumFractionDigits: 0,
   });
 
-  const fecha = new Date(proclama.created_at).toLocaleDateString(
-    lang === "es" ? "es-ES" : "en-US",
-    { year: "numeric", month: "long", day: "numeric" }
-  );
+  const fecha = formatDateTime(proclama.created_at);
 
   const shareUrl =
     typeof window !== "undefined"
@@ -76,12 +83,6 @@ export default function ProclamaPageClient({
               className="text-muted hover:text-foreground text-base border border-line px-2.5 py-1.5 rounded-lg transition-colors"
             >
               {theme === "dark" ? "☀️" : "🌙"}
-            </button>
-            <button
-              onClick={() => setLang(lang === "es" ? "en" : "es")}
-              className="text-muted hover:text-foreground text-xs font-mono border border-line px-2.5 py-1.5 rounded-lg transition-colors"
-            >
-              {tr("langToggle")}
             </button>
             <Link href="/" className="text-muted hover:text-foreground text-sm transition-colors">
               {tr("backToWall")}
@@ -111,9 +112,6 @@ export default function ProclamaPageClient({
                 <div className="ml-auto flex gap-1.5">
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent">
                     {monto}
-                  </span>
-                  <span className="text-xs text-muted px-2 py-0.5 rounded-full bg-line">
-                    {proclama.categoria}
                   </span>
                 </div>
               </div>

@@ -9,35 +9,16 @@ function totalReacciones(r: Record<string, number> | null): number {
   return Object.values(r).reduce((a, b) => a + b, 0);
 }
 
-function Avatar({ name, size = "sm" }: { name: string; size?: "sm" | "md" }) {
-  const initial = name.trim()[0]?.toUpperCase() ?? "?";
-  const colors = [
-    "bg-blue-600", "bg-purple-600", "bg-green-600",
-    "bg-orange-600", "bg-red-600", "bg-pink-600",
-  ];
-  const color = colors[name.charCodeAt(0) % colors.length];
-  const sz = size === "sm" ? "w-7 h-7 text-xs" : "w-9 h-9 text-sm";
-  return (
-    <div className={`${sz} ${color} rounded-full flex items-center justify-center text-white font-bold shrink-0`}>
-      {initial}
-    </div>
-  );
-}
-
 export default function RightSidebar({
   proclamas,
 }: {
   proclamas: Proclama[];
   totalCount?: number;
 }) {
-  const { lang, tr } = useLanguage();
+  const { tr } = useLanguage();
 
   const top3 = [...proclamas].sort((a, b) => b.monto - a.monto).slice(0, 3);
   const medals = ["🥇", "🥈", "🥉"];
-
-  const recent = [...proclamas]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 3);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -66,35 +47,6 @@ export default function RightSidebar({
                 </p>
                 <p className="text-muted text-xs mt-0.5">
                   {(p.monto / 100).toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 })}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent */}
-      <div>
-        <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-3">
-          {tr("rightMasRecientes")}
-        </p>
-        <div className="space-y-3">
-          {recent.map((p) => (
-            <Link
-              key={p.id}
-              href={`/p/${p.id}`}
-              className="flex items-start gap-2 group"
-            >
-              <Avatar name={p.autor} />
-              <div className="min-w-0 flex-1">
-                <p className="text-foreground text-xs font-medium leading-snug line-clamp-2 group-hover:text-accent transition-colors">
-                  &ldquo;{p.texto.slice(0, 60)}{p.texto.length > 60 ? "…" : ""}&rdquo;
-                </p>
-                <p className="text-muted text-xs mt-0.5">
-                  {new Date(p.created_at).toLocaleDateString(
-                    lang === "es" ? "es-ES" : "en-US",
-                    { month: "short", day: "numeric" }
-                  )}
                 </p>
               </div>
             </Link>

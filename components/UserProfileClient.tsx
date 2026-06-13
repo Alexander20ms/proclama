@@ -20,13 +20,13 @@ type Props = {
 };
 
 export default function UserProfileClient({ profile, proclamas, totalGastado, totalReacciones }: Props) {
-  const { tr, lang } = useLanguage();
+  const { tr } = useLanguage();
 
   const initial = profile.username[0]?.toUpperCase() ?? "?";
-  const joinDate = new Date(profile.created_at).toLocaleDateString(
-    lang === "es" ? "es-ES" : "en-US",
-    { month: "long", year: "numeric" }
-  );
+  const joinDate = new Date(profile.created_at).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
 
   return (
     <div className="min-h-screen bg-bg">

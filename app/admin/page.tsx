@@ -15,11 +15,7 @@ type Respuesta = {
   monto: number; publicada: boolean; created_at: string;
 };
 
-type Categoria = {
-  id: string; nombre_es: string; nombre_en: string; emoji: string; activa: boolean;
-};
-
-type Tab = "proclamas" | "respuestas" | "gratis" | "categorias" | "stats";
+type Tab = "proclamas" | "respuestas" | "gratis" | "stats";
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -32,7 +28,7 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
 }
 
 export default function AdminPage() {
-  const { tr, lang } = useLanguage();
+  const { tr } = useLanguage();
 
   const [password, setPassword] = useState("");
   const [autenticado, setAutenticado] = useState(false);
@@ -48,17 +44,9 @@ export default function AdminPage() {
 
   const [freeTexto, setFreeTexto] = useState("");
   const [freeAutor, setFreeAutor] = useState("");
-  const [freeCategoria, setFreeCategoria] = useState("");
   const [freeMonto, setFreeMonto] = useState("0");
   const [freeLoading, setFreeLoading] = useState(false);
   const [freeMsg, setFreeMsg] = useState("");
-
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [catLoaded, setCatLoaded] = useState(false);
-  const [newNombreEs, setNewNombreEs] = useState("");
-  const [newNombreEn, setNewNombreEn] = useState("");
-  const [newEmoji, setNewEmoji] = useState("🌍");
-  const [catLoading, setCatLoading] = useState(false);
 
   // ── Login ──────────────────────────────────────────────────────────
   const login = useCallback(async (e: React.FormEvent) => {
@@ -153,7 +141,7 @@ export default function AdminPage() {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         password, texto: freeTexto.trim(), autor: freeAutor.trim(),
-        categoria: freeCategoria || "General",
+        categoria: "General",
         monto: Math.round((parseFloat(freeMonto) || 0) * 100),
       }),
     });
@@ -168,59 +156,8 @@ export default function AdminPage() {
     setFreeLoading(false);
   }
 
-  // ── Categories ─────────────────────────────────────────────────────
-  async function loadCats() {
-    if (catLoaded) return;
-    const res = await fetch("/api/admin/categorias", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    if (res.ok) {
-      const d = await res.json();
-      setCategorias(d.categorias);
-      if (d.categorias.length) setFreeCategoria(d.categorias[0].nombre_es);
-      setCatLoaded(true);
-    }
-  }
-
-  async function handleCatToggle(id: string) {
-    const res = await fetch("/api/admin/categorias/toggle", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, password }),
-    });
-    if (res.ok) {
-      const d = await res.json();
-      setCategorias((c) => c.map((x) => (x.id === id ? { ...x, activa: d.activa } : x)));
-    }
-  }
-
-  async function handleCatDelete(id: string) {
-    if (!confirm(tr("adminDeleteConfirm"))) return;
-    const res = await fetch("/api/admin/categorias/delete", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, password }),
-    });
-    if (res.ok) setCategorias((c) => c.filter((x) => x.id !== id));
-  }
-
-  async function handleCatCreate(e: React.FormEvent) {
-    e.preventDefault();
-    setCatLoading(true);
-    const res = await fetch("/api/admin/categorias/create", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password, nombre_es: newNombreEs, nombre_en: newNombreEn, emoji: newEmoji }),
-    });
-    if (res.ok) {
-      const d = await res.json();
-      setCategorias((c) => [...c, d.categoria]);
-      setNewNombreEs(""); setNewNombreEn(""); setNewEmoji("🌍");
-    }
-    setCatLoading(false);
-  }
-
   function switchTab(t: Tab) {
     setTab(t);
-    if (t === "categorias" || t === "gratis") loadCats();
     if (t === "respuestas") loadRespuestas();
   }
 
@@ -232,9 +169,6 @@ export default function AdminPage() {
       const r = p.reacciones ?? {};
       return sum + Object.values(r).reduce((a, b) => a + b, 0);
     }, 0);
-    const catCounts: Record<string, number> = {};
-    pub.forEach((p) => { catCounts[p.categoria] = (catCounts[p.categoria] ?? 0) + 1; });
-    const catPopular = Object.entries(catCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
     const sorted = [...pub].sort((a, b) => b.monto - a.monto);
     const masCara = sorted[0];
     const promedio = pub.length > 0 ? ingresos / pub.length : 0;
@@ -248,7 +182,7 @@ export default function AdminPage() {
     const top5ByCount = Object.entries(autorCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
     const top5ByMonto = Object.entries(autorMontos).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-    return { ingresos, pubCount: pub.length, totalReacciones, catPopular, masCara, promedio, top5ByCount, top5ByMonto };
+    return { ingresos, pubCount: pub.length, totalReacciones, masCara, promedio, top5ByCount, top5ByMonto };
   }, [proclamas]);
 
   // ─────────────────────────────────────────────────────────────────
@@ -303,7 +237,7 @@ export default function AdminPage() {
       <main className="max-w-5xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-1 bg-surface border border-line rounded-xl p-1 mb-8 w-fit flex-wrap">
-          {(["proclamas", "respuestas", "gratis", "categorias", "stats"] as Tab[]).map((t) => (
+          {(["proclamas", "respuestas", "gratis", "stats"] as Tab[]).map((t) => (
             <button key={t} onClick={() => switchTab(t)}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
                 tab === t ? "bg-accent text-white" : "text-muted hover:text-foreground"
@@ -312,7 +246,6 @@ export default function AdminPage() {
               {t === "proclamas" ? tr("adminTabProclamaas")
                 : t === "respuestas" ? tr("adminTabRespuestas")
                 : t === "gratis" ? tr("adminTabFree")
-                : t === "categorias" ? tr("adminTabCats")
                 : tr("adminTabStats")}
             </button>
           ))}
@@ -339,7 +272,7 @@ export default function AdminPage() {
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                           <span className="text-muted">— {p.autor}</span>
                           <span className="text-emerald-400 font-bold">${(p.monto / 100).toFixed(2)}</span>
-                          <span className="text-muted">{new Date(p.created_at).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { day: "numeric", month: "short", year: "numeric" })}</span>
+                          <span className="text-muted">{new Date(p.created_at).toLocaleString("en-US", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true })}</span>
                           <span className={p.publicada ? "text-emerald-400 font-medium" : "text-orange-400 font-medium"}>
                             {p.publicada ? tr("adminStatusPub") : tr("adminStatusHid")}
                           </span>
@@ -387,7 +320,7 @@ export default function AdminPage() {
                           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                             <span className="text-muted">— {r.autor}</span>
                             <span className="text-emerald-400 font-bold">${Number(r.monto).toFixed(2)}</span>
-                            <span className="text-muted">{new Date(r.created_at).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { day: "numeric", month: "short", year: "numeric" })}</span>
+                            <span className="text-muted">{new Date(r.created_at).toLocaleString("en-US", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true })}</span>
                             <Link href={`/p/${r.proclama_id}`} className="text-accent text-xs hover:underline">
                               {tr("adminRespViewProclama")}
                             </Link>
@@ -433,15 +366,6 @@ export default function AdminPage() {
                   className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-muted mb-2">{tr("adminFreeCatLabel")}</label>
-                <select value={freeCategoria} onChange={(e) => setFreeCategoria(e.target.value)}
-                  className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-1 focus:ring-accent">
-                  {categorias.filter((c) => c.activa).map((c) => (
-                    <option key={c.id} value={c.nombre_es}>{c.emoji} {lang === "es" ? c.nombre_es : c.nombre_en}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
                 <label className="block text-sm font-semibold text-muted mb-2">{tr("adminFreeMontoLabel")}</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">$</span>
@@ -458,60 +382,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ── Categorías ── */}
-        {tab === "categorias" && (
-          <div>
-            <h2 className="text-lg font-bold text-foreground mb-6">{tr("adminCatsTitle")}</h2>
-            <div className="space-y-2 mb-8">
-              {categorias.map((cat) => (
-                <div key={cat.id} className="bg-surface border border-line rounded-xl px-5 py-3 flex items-center gap-4">
-                  <span className="text-2xl">{cat.emoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-foreground font-medium">{cat.nombre_es} / {cat.nombre_en}</p>
-                    <span className={`text-xs font-semibold ${cat.activa ? "text-emerald-400" : "text-muted"}`}>
-                      {cat.activa ? tr("adminCatsActive") : tr("adminCatsInactive")}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => handleCatToggle(cat.id)}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${cat.activa ? "bg-orange-900/30 text-orange-400" : "bg-emerald-900/30 text-emerald-400"}`}>
-                      {cat.activa ? tr("adminCatsDeactivateBtn") : tr("adminCatsActivateBtn")}
-                    </button>
-                    <button onClick={() => handleCatDelete(cat.id)}
-                      className="px-3 py-1 rounded-lg text-xs font-semibold bg-red-900/30 text-red-400 transition-colors">
-                      {tr("adminCatsDeleteBtn")}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="bg-surface border border-line rounded-2xl p-6">
-              <h3 className="text-foreground font-bold mb-4">{tr("adminCatsNewTitle")}</h3>
-              <form onSubmit={handleCatCreate} className="flex flex-wrap gap-3 items-end">
-                <div>
-                  <label className="block text-xs text-muted mb-1">{tr("adminCatsEmoji")}</label>
-                  <input type="text" value={newEmoji} onChange={(e) => setNewEmoji(e.target.value)} maxLength={4}
-                    className="w-16 bg-bg border border-line rounded-xl px-3 py-2 text-foreground text-center focus:outline-none focus:ring-1 focus:ring-accent" />
-                </div>
-                <div>
-                  <label className="block text-xs text-muted mb-1">{tr("adminCatsNombreEs")}</label>
-                  <input type="text" value={newNombreEs} onChange={(e) => setNewNombreEs(e.target.value)} required
-                    className="bg-bg border border-line rounded-xl px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-accent w-36" />
-                </div>
-                <div>
-                  <label className="block text-xs text-muted mb-1">{tr("adminCatsNombreEn")}</label>
-                  <input type="text" value={newNombreEn} onChange={(e) => setNewNombreEn(e.target.value)} required
-                    className="bg-bg border border-line rounded-xl px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-accent w-36" />
-                </div>
-                <button type="submit" disabled={catLoading || !newNombreEs || !newNombreEn}
-                  className="bg-accent text-white font-semibold px-5 py-2 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40">
-                  {catLoading ? tr("adminCatsAddBtnLoading") : tr("adminCatsAddBtn")}
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
         {/* ── Stats ── */}
         {tab === "stats" && (
           <div>
@@ -520,7 +390,6 @@ export default function AdminPage() {
               <StatCard label={tr("statsTotalIngresos")} value={`$${stats.ingresos.toFixed(2)}`} />
               <StatCard label={tr("statsPublicadas")} value={String(stats.pubCount)} />
               <StatCard label={tr("statsTotalReacciones")} value={String(stats.totalReacciones)} />
-              <StatCard label={tr("statsCatPopular")} value={stats.catPopular} />
               <StatCard label={tr("statsPromedio")} value={`$${stats.promedio.toFixed(2)}`} />
               {stats.masCara && (
                 <StatCard label={tr("statsMasCara")} value={`$${(stats.masCara.monto / 100).toFixed(2)}`} sub={stats.masCara.autor} />
@@ -534,7 +403,6 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* Top authors */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="bg-surface border border-line rounded-2xl p-5">
                 <p className="text-muted text-xs font-semibold uppercase tracking-wider mb-4">{tr("adminTopActive")}</p>
