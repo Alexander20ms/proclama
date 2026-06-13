@@ -100,7 +100,7 @@ export default function NuevaPage() {
           <h1 className="text-2xl font-bold text-foreground mb-1">
             {tr("nuevaTitle")}
           </h1>
-          <p className="text-muted text-sm mb-8">{tr("nuevaDesc")}</p>
+          <p className="text-muted text-sm mb-8">Your words. Your truth. Make it permanent.</p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Texto */}
@@ -111,42 +111,20 @@ export default function NuevaPage() {
               </label>
               <textarea
                 value={texto}
-                onChange={(e) => setTexto(e.target.value.slice(0, 280))}
+                onChange={(e) => setTexto(e.target.value.slice(0, 500))}
                 placeholder={tr("nuevaTextoPlaceholder")}
-                rows={4}
+                rows={5}
                 required
                 className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none text-lg leading-relaxed"
               />
               <div className="flex justify-end mt-1.5">
                 <span
                   className={`text-xs font-medium ${
-                    texto.length >= 260 ? "text-orange-400" : "text-muted"
+                    texto.length >= 460 ? "text-orange-400" : "text-muted"
                   }`}
                 >
-                  {280 - texto.length} {tr("charactersLeft")}
+                  {500 - texto.length} {tr("charactersLeft")}
                 </span>
-              </div>
-            </div>
-
-            {/* Autor (read-only, from profile) */}
-            <div>
-              <label className="block text-sm font-semibold text-muted mb-2">
-                {tr("nuevaAutorLabel")}
-              </label>
-              <div className="flex items-center gap-3 bg-bg border border-line rounded-xl px-4 py-3">
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
-                  style={{ backgroundColor: profile?.color ?? "#3B82F6" }}
-                >
-                  {autor[0]?.toUpperCase()}
-                </div>
-                <span className="text-foreground font-medium">{autor}</span>
-                <Link
-                  href="/perfil"
-                  className="ml-auto text-xs text-accent hover:underline"
-                >
-                  {tr("profileCambiar")}
-                </Link>
               </div>
             </div>
 
