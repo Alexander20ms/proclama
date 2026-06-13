@@ -18,7 +18,7 @@ type Props = {
 };
 
 export default function LeftSidebar({
-  categorias,
+  categorias: propCategorias,
   selectedCategoria,
   onCategoriaChange,
   search,
@@ -27,8 +27,36 @@ export default function LeftSidebar({
   const { tr, lang, setLang, toggleTheme, theme } = useLanguage();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  const [categorias, setCategorias] = useState<CategoriaItem[]>(propCategorias);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Fetch categories directly from Supabase API on mount
+  useEffect(() => {
+    fetch("/api/categorias")
+      .then((r) => r.json())
+      .then((data) => {
+        const cats = (data.categorias ?? []) as Array<{
+          nombre_es: string;
+          nombre_en: string;
+          emoji: string;
+        }>;
+        if (cats.length > 0) {
+          setCategorias(cats.map((c) => ({
+            nombre_es: c.nombre_es,
+            nombre_en: c.nombre_en,
+            emoji: c.emoji,
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Sync prop updates
+  useEffect(() => {
+    if (propCategorias.length > 0) setCategorias(propCategorias);
+  }, [propCategorias]);
+
+  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -141,7 +169,7 @@ export default function LeftSidebar({
           onClick={toggleTheme}
           className="flex-1 text-muted hover:text-foreground text-xs border border-line py-1.5 rounded-lg transition-colors"
         >
-          {theme === "dark" ? "☀️ Claro" : "🌙 Oscuro"}
+          {theme === "dark" ? `☀️ ${tr("lightMode")}` : `🌙 ${tr("darkMode")}`}
         </button>
         <button
           onClick={() => setLang(lang === "es" ? "en" : "es")}

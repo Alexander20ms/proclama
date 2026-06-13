@@ -24,7 +24,7 @@ export default function HomeClient({
   initialProclamaas,
   totalCount,
   hasMore: initialHasMore,
-  categorias,
+  categorias: initialCategorias,
   totalReacciones,
 }: Props) {
   const { tr, lang } = useLanguage();
@@ -36,6 +36,9 @@ export default function HomeClient({
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
 
+  // Categories: start with SSR data, then fetch fresh client-side
+  const [categorias, setCategorias] = useState<CategoriaItem[]>(initialCategorias);
+
   const [categoria, setCategoria] = useState("all");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("monto");
@@ -44,6 +47,27 @@ export default function HomeClient({
   const isFirstRender = useRef(true);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Fetch categories client-side on mount (fixes SSR fetch failures)
+  useEffect(() => {
+    fetch("/api/categorias")
+      .then((r) => r.json())
+      .then((data) => {
+        const cats = (data.categorias ?? []) as Array<{
+          nombre_es: string;
+          nombre_en: string;
+          emoji: string;
+        }>;
+        if (cats.length > 0) {
+          setCategorias(cats.map((c) => ({
+            nombre_es: c.nombre_es,
+            nombre_en: c.nombre_en,
+            emoji: c.emoji,
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Debounce search
   useEffect(() => {
