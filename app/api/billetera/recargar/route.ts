@@ -7,11 +7,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-05-27.dahlia",
 });
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 const PACKAGES = [
   { id: "p5", amount_usd: 5, nebulosas: 20, label: "$5 — 20 🌌" },
   { id: "p10", amount_usd: 10, nebulosas: 40, label: "$10 — 40 🌌" },

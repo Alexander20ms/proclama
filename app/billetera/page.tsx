@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -38,7 +38,7 @@ function formatDate(d: string) {
   });
 }
 
-export default function BilleteraPage() {
+function BilleteraContent() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -368,5 +368,17 @@ export default function BilleteraPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function BilleteraPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-line border-t-accent rounded-full animate-spin" />
+      </div>
+    }>
+      <BilleteraContent />
+    </Suspense>
   );
 }

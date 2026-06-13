@@ -12,7 +12,7 @@ const NEBULOSAS_PRESET = [2, 4, 10, 20, 40, 100, 200];
 
 export default function NuevaPage() {
   const { tr } = useLanguage();
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [texto, setTexto] = useState("");

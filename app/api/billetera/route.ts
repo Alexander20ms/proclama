@@ -8,7 +8,7 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function GET(request: Request) {
+export async function GET() {
   // Get user from Authorization header (Bearer token)
   const headersList = headers();
   const auth = headersList.get("authorization");
