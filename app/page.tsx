@@ -10,25 +10,21 @@ export default async function Home() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const { data: initial, count } = await supabase
-    .from("proclamas")
-    .select(
-      "id, texto, autor, monto, categoria, reacciones, created_at, apoyos, monto_total, user_id",
-      { count: "exact" }
-    )
-    .eq("publicada", true)
-    .order("monto", { ascending: false })
-    .range(0, 9);
+  const { data } = await supabase.rpc("get_proclamas_random", {
+    p_limit: 10,
+    p_offset: 0,
+    p_search: "",
+  });
 
-  const totalCount = count ?? 0;
-  const proclamas = (initial as Proclama[]) ?? [];
+  const rows = (data as Array<Record<string, unknown>>) ?? [];
+  const totalCount = (rows[0]?.total_count as number) ?? 0;
+  const proclamas = rows as unknown as Proclama[];
+  const hasMore = totalCount > 10;
 
   const totalReacciones = proclamas.reduce((sum, p) => {
     const r = p.reacciones ?? {};
     return sum + Object.values(r).reduce((a, b) => a + b, 0);
   }, 0);
-
-  const hasMore = totalCount > 10;
 
   return (
     <HomeClient

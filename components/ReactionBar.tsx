@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-const EMOJIS = ["🔥", "❤️", "😱", "👏", "🤯"] as const;
+const EMOJIS = ["🔥", "❤️", "😱", "🤯"] as const;
 type Emoji = (typeof EMOJIS)[number];
 
 type Props = {

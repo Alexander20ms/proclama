@@ -8,6 +8,7 @@ type Profile = {
   id: string;
   username: string;
   color: string;
+  animal?: string | null;
   created_at: string;
 };
 
@@ -19,7 +20,7 @@ async function getData(username: string) {
 
   const { data: profile } = await supabase
     .from("perfiles")
-    .select("id, username, color, created_at")
+    .select("id, username, color, animal, created_at")
     .eq("username", username)
     .single();
 

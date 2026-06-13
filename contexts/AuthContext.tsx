@@ -14,6 +14,7 @@ export type Profile = {
   id: string;
   username: string;
   color: string;
+  animal?: string | null;
 };
 
 type AuthCtx = {
@@ -40,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function fetchProfile(userId: string) {
     const { data } = await supabase
       .from("perfiles")
-      .select("id, username, color")
+      .select("id, username, color, animal")
       .eq("id", userId)
       .single();
     setProfile(data ?? null);

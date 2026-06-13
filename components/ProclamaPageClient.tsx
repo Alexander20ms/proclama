@@ -7,33 +7,29 @@ import ReactionBar from "./ReactionBar";
 import RespuestaThread, { type Respuesta } from "./RespuestaThread";
 import type { Proclama } from "./ProclamaCard";
 import { getTier, type TierInfo } from "@/lib/tiers";
+import { getAnimal } from "@/lib/animals";
 
-const COLORS = [
-  "bg-blue-600", "bg-purple-600", "bg-green-600",
-  "bg-orange-600", "bg-red-600", "bg-pink-600",
-];
-
-function Avatar({
+function AnimalEmoji({
   name,
+  savedAnimal,
   size = "lg",
   className = "",
 }: {
   name: string;
-  size?: "sm" | "lg" | "xl";
+  savedAnimal?: string | null;
+  size?: "lg" | "xl";
   className?: string;
 }) {
-  const initial = name.trim()[0]?.toUpperCase() ?? "?";
-  const color = COLORS[name.charCodeAt(0) % COLORS.length];
-  const sz =
-    size === "xl" ? "w-16 h-16 text-2xl" :
-    size === "lg" ? "w-12 h-12 text-base" :
-    "w-8 h-8 text-xs";
+  const animal = getAnimal(name, savedAnimal);
+  const sz = size === "xl" ? "text-[48px]" : "text-[40px]";
   return (
-    <div
-      className={`${sz} ${color} rounded-full flex items-center justify-center text-white font-bold shrink-0 ${className}`}
+    <span
+      className={`${sz} leading-none shrink-0 cursor-default select-none inline-block transition-transform duration-300 hover:scale-125 ${className}`}
+      role="img"
+      aria-label={name}
     >
-      {initial}
-    </div>
+      {animal}
+    </span>
   );
 }
 
@@ -151,8 +147,9 @@ export default function ProclamaPageClient({
           )}
 
           <div className="flex gap-3">
-            <Avatar
+            <AnimalEmoji
               name={proclama.autor}
+              savedAnimal={proclama.autor_animal}
               size={tier.level === 7 ? "xl" : "lg"}
               className={tier.avatarClass}
             />

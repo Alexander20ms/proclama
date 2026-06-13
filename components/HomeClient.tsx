@@ -9,8 +9,6 @@ import LeftSidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
 import UserMenu from "./UserMenu";
 
-type SortKey = "monto" | "reacciones";
-
 type Props = {
   initialProclamaas: Proclama[];
   totalCount: number;
@@ -33,7 +31,6 @@ export default function HomeClient({
   const [loading, setLoading] = useState(false);
 
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<SortKey>("monto");
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
@@ -50,7 +47,7 @@ export default function HomeClient({
   const fetchPage = useCallback(
     async (p: number, reset = false) => {
       setLoading(true);
-      const params = new URLSearchParams({ page: String(p), limit: "10", sort });
+      const params = new URLSearchParams({ page: String(p), limit: "10" });
       if (debouncedSearch) params.set("q", debouncedSearch);
 
       try {
@@ -74,10 +71,10 @@ export default function HomeClient({
         setLoading(false);
       }
     },
-    [debouncedSearch, sort]
+    [debouncedSearch]
   );
 
-  // Reset on filter change
+  // Reset on search change
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -85,7 +82,7 @@ export default function HomeClient({
     }
     setPage(1);
     fetchPage(1, true);
-  }, [debouncedSearch, sort, fetchPage]);
+  }, [debouncedSearch, fetchPage]);
 
   // Infinite scroll via IntersectionObserver
   useEffect(() => {
@@ -102,11 +99,6 @@ export default function HomeClient({
     observer.observe(el);
     return () => observer.disconnect();
   }, [hasMore, loading, page, fetchPage]);
-
-  const SORT_OPTS: { key: SortKey; label: string }[] = [
-    { key: "monto", label: tr("sortMonto") },
-    { key: "reacciones", label: tr("sortReacciones") },
-  ];
 
   return (
     <div className="min-h-screen bg-bg">
@@ -152,69 +144,52 @@ export default function HomeClient({
 
         {/* Center feed */}
         <main className="flex-1 min-w-0 max-w-[600px] border-x border-line">
-          {/* Sort tabs */}
-          <div className="sticky top-0 z-30 bg-bg/95 backdrop-blur border-b border-line">
-            <div className="flex">
-              {SORT_OPTS.map((opt) => (
-                <button
-                  key={opt.key}
-                  onClick={() => setSort(opt.key)}
-                  className={`flex-1 py-3 text-xs font-semibold transition-colors border-b-2 ${
-                    sort === opt.key
-                      ? "border-accent text-accent"
-                      : "border-transparent text-muted hover:text-foreground"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Feed */}
-          {proclamas.length === 0 && !loading ? (
-            <div className="text-center py-28 px-4">
-              <p className="text-5xl mb-5">📣</p>
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                {debouncedSearch ? tr("noResults") : tr("muroEmpty")}
-              </h2>
-              {!debouncedSearch && (
-                <Link
-                  href="/nueva"
-                  className="mt-6 inline-block bg-accent text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-500 transition-colors"
-                >
-                  {tr("muroEmptyBtn")}
-                </Link>
-              )}
-            </div>
-          ) : (
-            <>
-              {proclamas.map((p) => (
-                <ProclamaCard
-                  key={p.id}
-                  proclama={p}
-                  isNew={newIds.has(p.id)}
-                />
-              ))}
+          <div className="px-3 py-4">
+            {proclamas.length === 0 && !loading ? (
+              <div className="text-center py-28 px-4">
+                <p className="text-5xl mb-5">📣</p>
+                <h2 className="text-2xl font-bold text-foreground mb-2">
+                  {debouncedSearch ? tr("noResults") : tr("muroEmpty")}
+                </h2>
+                {!debouncedSearch && (
+                  <Link
+                    href="/nueva"
+                    className="mt-6 inline-block bg-accent text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-500 transition-colors"
+                  >
+                    {tr("muroEmptyBtn")}
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <>
+                {proclamas.map((p) => (
+                  <ProclamaCard
+                    key={p.id}
+                    proclama={p}
+                    isNew={newIds.has(p.id)}
+                  />
+                ))}
 
-              {/* Sentinel for infinite scroll */}
-              <div ref={sentinelRef} className="h-4" />
+                {/* Sentinel for infinite scroll */}
+                <div ref={sentinelRef} className="h-4" />
 
-              {/* Loading spinner */}
-              {loading && (
-                <div className="flex justify-center py-6">
-                  <div className="w-6 h-6 border-2 border-line border-t-accent rounded-full animate-spin" />
-                </div>
-              )}
+                {/* Loading spinner */}
+                {loading && (
+                  <div className="flex justify-center py-6">
+                    <div className="w-6 h-6 border-2 border-line border-t-accent rounded-full animate-spin" />
+                  </div>
+                )}
 
-              {/* End of feed */}
-              {!hasMore && proclamas.length > 0 && (
-                <p className="text-center text-muted text-xs py-8">
-                  — {tr("footer")} —
-                </p>
-              )}
-            </>
-          )}
+                {/* End of feed */}
+                {!hasMore && proclamas.length > 0 && (
+                  <p className="text-center text-muted text-xs py-8">
+                    — {tr("footer")} —
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         </main>
 
         {/* Right sidebar — large screens only */}

@@ -12,16 +12,23 @@ export type Respuesta = {
 };
 
 const MONTOS = [1, 2, 5, 10];
-const COLORS = ["bg-blue-600", "bg-purple-600", "bg-green-600", "bg-orange-600", "bg-red-600", "bg-pink-600"];
 
-function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
-  const initial = name.trim()[0]?.toUpperCase() ?? "?";
-  const color = COLORS[name.charCodeAt(0) % COLORS.length];
-  const sz = size === "sm" ? "w-7 h-7 text-xs" : "w-9 h-9 text-sm";
+function AnimalEmoji({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) {
+    h = (Math.imul(31, h) + name.charCodeAt(i)) | 0;
+  }
+  const ANIMALS = ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐙","🦋","🐧","🦄","🐺","🦝"];
+  const animal = ANIMALS[Math.abs(h) % ANIMALS.length];
+  const sz = size === "sm" ? "text-[22px]" : "text-[26px]";
   return (
-    <div className={`${sz} ${color} rounded-full flex items-center justify-center text-white font-bold shrink-0`}>
-      {initial}
-    </div>
+    <span
+      className={`${sz} leading-none shrink-0 select-none inline-block transition-transform duration-300 hover:scale-125`}
+      role="img"
+      aria-label={name}
+    >
+      {animal}
+    </span>
   );
 }
 
@@ -108,7 +115,7 @@ export default function RespuestaThread({ proclamaId, initialRespuestas }: Props
                 });
                 return (
                   <div key={r.id} className="flex gap-3 py-3">
-                    <Avatar name={r.autor} size="sm" />
+                    <AnimalEmoji name={r.autor} size="sm" />
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
                         <span className="text-foreground text-sm font-semibold">

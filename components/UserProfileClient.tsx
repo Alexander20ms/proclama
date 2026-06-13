@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProclamaCard from "./ProclamaCard";
 import type { Proclama } from "./ProclamaCard";
+import { getAnimal } from "@/lib/animals";
 
 type Profile = {
   id: string;
   username: string;
   color: string;
+  animal?: string | null;
   created_at: string;
 };
 
@@ -22,7 +24,7 @@ type Props = {
 export default function UserProfileClient({ profile, proclamas, totalGastado, totalReacciones }: Props) {
   const { tr } = useLanguage();
 
-  const initial = profile.username[0]?.toUpperCase() ?? "?";
+  const animal = getAnimal(profile.username, profile.animal);
   const joinDate = new Date(profile.created_at).toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
@@ -46,12 +48,13 @@ export default function UserProfileClient({ profile, proclamas, totalGastado, to
       <div className="border-b border-line">
         <div className="max-w-2xl mx-auto px-4 py-8">
           <div className="flex items-start gap-5">
-            <div
-              className="w-20 h-20 rounded-full flex items-center justify-center text-white font-extrabold text-3xl shrink-0"
-              style={{ backgroundColor: profile.color }}
+            <span
+              className="text-[64px] leading-none shrink-0 select-none inline-block transition-transform duration-300 hover:scale-125 cursor-default"
+              role="img"
+              aria-label={profile.username}
             >
-              {initial}
-            </div>
+              {animal}
+            </span>
             <div className="flex-1 min-w-0">
               <h1 className="text-foreground font-extrabold text-2xl">@{profile.username}</h1>
               <p className="text-muted text-sm mt-0.5">{tr("userJoined")} {joinDate}</p>

@@ -102,6 +102,7 @@ body {
    ============================================================ */
 .tier-1-card {
   border-left: 2px solid #444 !important;
+  border-radius: 20px !important;
 }
 .tier-1-name-badge {
   display: inline-flex;
@@ -127,6 +128,7 @@ body {
 .tier-2-card {
   border-left: 2px solid rgba(59, 130, 246, 0.65) !important;
   box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+  border-radius: 20px !important;
 }
 .tier-2-name-badge {
   display: inline-flex;
@@ -153,6 +155,7 @@ body {
 .tier-3-card {
   position: relative;
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  border-radius: 20px !important;
 }
 /* Gradient border via mask technique */
 .tier-3-card::before {
@@ -160,6 +163,7 @@ body {
   position: absolute;
   inset: 0;
   padding: 1.5px;
+  border-radius: 20px;
   background: linear-gradient(135deg, #10B981, #3B82F6, #10B981);
   background-size: 200% 200%;
   animation: tier-gradient-flow 3s ease infinite;
@@ -199,7 +203,7 @@ body {
 .tier-4-card {
   border: 1.5px solid #F59E0B !important;
   box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
-  margin: 2px 0;
+  border-radius: 20px !important;
 }
 .dark .tier-4-card {
   background: linear-gradient(135deg, #1a1500 0%, #111111 100%) !important;
@@ -232,7 +236,7 @@ body {
   border: 1.5px solid rgba(192, 192, 192, 0.5) !important;
   box-shadow: 0 0 40px rgba(192, 192, 192, 0.45);
   overflow: hidden;
-  margin: 2px 0;
+  border-radius: 20px !important;
 }
 .dark .tier-5-card {
   background: linear-gradient(135deg, #0d0d1a 0%, #111111 100%) !important;
@@ -303,7 +307,7 @@ body {
   position: relative;
   animation: tier-rainbow-pulse 3s ease infinite;
   overflow: hidden;
-  margin: 2px 0;
+  border-radius: 20px !important;
 }
 /* Rainbow gradient border via mask */
 .tier-6-card::before {
@@ -311,6 +315,7 @@ body {
   position: absolute;
   inset: 0;
   padding: 2px;
+  border-radius: 20px;
   background: linear-gradient(
     135deg,
     #ff0000, #ff7700, #ffff00, #00ff00,
@@ -375,7 +380,7 @@ body {
   position: relative;
   border: 2px solid #FFD700 !important;
   animation: tier-halo 2s ease infinite;
-  margin: 6px 0;
+  border-radius: 20px !important;
 }
 .dark .tier-7-card {
   background: #060606 !important;

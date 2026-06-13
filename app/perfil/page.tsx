@@ -6,12 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/lib/supabase";
-
-const PRESET_COLORS = [
-  "#3B82F6", "#8B5CF6", "#10B981", "#F59E0B",
-  "#EF4444", "#EC4899", "#06B6D4", "#F97316",
-  "#14B8A6", "#A855F7",
-];
+import { ANIMALS, getAnimal } from "@/lib/animals";
 
 type MiProclama = {
   id: string;
@@ -30,17 +25,19 @@ export default function PerfilPage() {
   const [tab, setTab] = useState<Tab>("info");
   const [misProclamas, setMisProclamaas] = useState<MiProclama[]>([]);
   const [loadingProclamaas, setLoadingProclamaas] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(profile?.color ?? "#3B82F6");
-  const [savingColor, setSavingColor] = useState(false);
-  const [colorSaved, setColorSaved] = useState(false);
+  const [selectedAnimal, setSelectedAnimal] = useState<string>("🐶");
+  const [savingAnimal, setSavingAnimal] = useState(false);
+  const [animalSaved, setAnimalSaved] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/login?next=/perfil");
   }, [authLoading, user, router]);
 
   useEffect(() => {
-    if (profile?.color) setSelectedColor(profile.color);
-  }, [profile?.color]);
+    if (profile) {
+      setSelectedAnimal(getAnimal(profile.username, profile.animal));
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (tab === "proclamas" && user && misProclamas.length === 0) {
@@ -58,14 +55,14 @@ export default function PerfilPage() {
     }
   }, [tab, user, misProclamas.length]);
 
-  async function saveColor() {
+  async function saveAnimal() {
     if (!user) return;
-    setSavingColor(true);
-    await supabase.from("perfiles").update({ color: selectedColor }).eq("id", user.id);
+    setSavingAnimal(true);
+    await supabase.from("perfiles").update({ animal: selectedAnimal }).eq("id", user.id);
     await refreshProfile();
-    setSavingColor(false);
-    setColorSaved(true);
-    setTimeout(() => setColorSaved(false), 2000);
+    setSavingAnimal(false);
+    setAnimalSaved(true);
+    setTimeout(() => setAnimalSaved(false), 2000);
   }
 
   async function handleSignOut() {
@@ -82,6 +79,7 @@ export default function PerfilPage() {
   }
 
   const totalGastado = misProclamas.reduce((s, p) => s + p.monto, 0) / 100;
+  const currentAnimal = getAnimal(profile.username, profile.animal);
 
   return (
     <div className="min-h-screen bg-bg">
@@ -103,12 +101,13 @@ export default function PerfilPage() {
       <main className="max-w-2xl mx-auto px-4 py-8">
         {/* Profile card */}
         <div className="bg-surface border border-line rounded-2xl p-6 mb-6 flex items-center gap-4">
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center text-white font-extrabold text-2xl shrink-0"
-            style={{ backgroundColor: profile.color }}
+          <span
+            className="text-[56px] leading-none shrink-0 select-none inline-block transition-transform duration-300 hover:scale-125 cursor-default"
+            role="img"
+            aria-label={profile.username}
           >
-            {profile.username[0]?.toUpperCase()}
-          </div>
+            {currentAnimal}
+          </span>
           <div>
             <p className="text-foreground font-bold text-lg">@{profile.username}</p>
             <p className="text-muted text-sm">{user.email}</p>
@@ -145,28 +144,29 @@ export default function PerfilPage() {
               <p className="text-foreground font-medium">{user.email}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">{tr("profileAvatarColor")}</p>
-              <div className="flex flex-wrap gap-3">
-                {PRESET_COLORS.map((c) => (
+              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-4">Your animal</p>
+              <div className="grid grid-cols-5 gap-3">
+                {ANIMALS.map((a) => (
                   <button
-                    key={c}
-                    onClick={() => setSelectedColor(c)}
-                    style={{ backgroundColor: c }}
-                    className={`w-10 h-10 rounded-full transition-all ${
-                      selectedColor === c
-                        ? "ring-2 ring-offset-2 ring-foreground ring-offset-bg scale-110"
-                        : "hover:scale-105"
+                    key={a}
+                    onClick={() => setSelectedAnimal(a)}
+                    className={`flex items-center justify-center w-14 h-14 rounded-2xl text-[32px] transition-all ${
+                      selectedAnimal === a
+                        ? "ring-2 ring-accent bg-accent/10 scale-110"
+                        : "hover:bg-hover hover:scale-105"
                     }`}
-                    title={c}
-                  />
+                    title={a}
+                  >
+                    {a}
+                  </button>
                 ))}
               </div>
               <button
-                onClick={saveColor}
-                disabled={savingColor || selectedColor === profile.color}
-                className="mt-4 bg-accent text-white font-bold px-6 py-2 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+                onClick={saveAnimal}
+                disabled={savingAnimal || selectedAnimal === currentAnimal}
+                className="mt-5 bg-accent text-white font-bold px-6 py-2 rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm"
               >
-                {savingColor ? tr("profileSaving") : colorSaved ? tr("profileSaved") : tr("profileSaveColor")}
+                {savingAnimal ? tr("profileSaving") : animalSaved ? tr("profileSaved") : "Save animal"}
               </button>
             </div>
           </div>

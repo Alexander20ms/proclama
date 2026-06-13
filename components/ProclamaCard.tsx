@@ -6,6 +6,7 @@ import ReactionBar from "./ReactionBar";
 import RespuestaThread from "./RespuestaThread";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getTier, type TierInfo } from "@/lib/tiers";
+import { getAnimal } from "@/lib/animals";
 
 export type Proclama = {
   id: string;
@@ -18,31 +19,30 @@ export type Proclama = {
   apoyos: number;
   monto_total: number;
   user_id?: string | null;
+  autor_animal?: string | null;
 };
 
-const COLORS = [
-  "bg-blue-600", "bg-purple-600", "bg-green-600",
-  "bg-orange-600", "bg-red-600", "bg-pink-600",
-];
-
-function Avatar({
+function AnimalEmoji({
   name,
+  savedAnimal,
   size = "md",
   className = "",
 }: {
   name: string;
+  savedAnimal?: string | null;
   size?: "md" | "xl";
   className?: string;
 }) {
-  const initial = name.trim()[0]?.toUpperCase() ?? "?";
-  const color = COLORS[name.charCodeAt(0) % COLORS.length];
-  const sz = size === "xl" ? "w-12 h-12 text-base" : "w-10 h-10 text-sm";
+  const animal = getAnimal(name, savedAnimal);
+  const sz = size === "xl" ? "text-[40px]" : "text-[32px]";
   return (
-    <div
-      className={`${sz} rounded-full ${color} flex items-center justify-center text-white font-bold shrink-0 ${className}`}
+    <span
+      className={`${sz} leading-none shrink-0 cursor-default select-none inline-block transition-transform duration-300 hover:scale-125 ${className}`}
+      role="img"
+      aria-label={name}
     >
-      {initial}
-    </div>
+      {animal}
+    </span>
   );
 }
 
@@ -67,7 +67,6 @@ function AmountBadge({ tier, monto }: { tier: TierInfo; monto: string }) {
     );
   }
 
-  // Tiers with gradient text (inner span needed)
   if (tier.amountInnerClass) {
     return (
       <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${tier.amountOuterClass}`}>
@@ -112,7 +111,7 @@ export default function ProclamaCard({
 
   return (
     <article
-      className={`px-4 py-4 border-b border-line transition-colors cursor-default ${hoverClass} ${
+      className={`px-6 py-5 rounded-[20px] border border-line mb-4 overflow-hidden transition-colors cursor-default ${hoverClass} ${
         isNew ? "card-enter" : ""
       } ${tier.cardClass}`}
     >
@@ -122,10 +121,11 @@ export default function ProclamaCard({
       )}
 
       <div className="flex gap-3">
-        {/* Avatar */}
+        {/* Animal avatar */}
         <div className="shrink-0 mt-0.5">
-          <Avatar
+          <AnimalEmoji
             name={proclama.autor}
+            savedAnimal={proclama.autor_animal}
             size={tier.level === 7 ? "xl" : "md"}
             className={tier.avatarClass}
           />
@@ -135,12 +135,10 @@ export default function ProclamaCard({
         <div className="flex-1 min-w-0">
           {/* Header row */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
-            {/* Author prefix emoji */}
             {tier.authorPrefix && (
               <span className="text-sm leading-none">{tier.authorPrefix}</span>
             )}
 
-            {/* Author name */}
             {proclama.user_id ? (
               <Link
                 href={`/u/${encodeURIComponent(proclama.autor)}`}
@@ -160,7 +158,6 @@ export default function ProclamaCard({
               </span>
             )}
 
-            {/* Tier name badge */}
             <TierNameBadge tier={tier} />
 
             <span className="text-muted text-xs">{fecha}</span>
