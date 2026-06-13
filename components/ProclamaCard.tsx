@@ -5,6 +5,7 @@ import Link from "next/link";
 import ReactionBar from "./ReactionBar";
 import RespuestaThread from "./RespuestaThread";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getTier, type TierInfo } from "@/lib/tiers";
 
 export type Proclama = {
   id: string;
@@ -24,12 +25,21 @@ const COLORS = [
   "bg-orange-600", "bg-red-600", "bg-pink-600",
 ];
 
-function Avatar({ name }: { name: string }) {
+function Avatar({
+  name,
+  size = "md",
+  className = "",
+}: {
+  name: string;
+  size?: "md" | "xl";
+  className?: string;
+}) {
   const initial = name.trim()[0]?.toUpperCase() ?? "?";
   const color = COLORS[name.charCodeAt(0) % COLORS.length];
+  const sz = size === "xl" ? "w-12 h-12 text-base" : "w-10 h-10 text-sm";
   return (
     <div
-      className={`w-10 h-10 rounded-full ${color} flex items-center justify-center text-white font-bold text-sm shrink-0`}
+      className={`${sz} rounded-full ${color} flex items-center justify-center text-white font-bold shrink-0 ${className}`}
     >
       {initial}
     </div>
@@ -46,6 +56,38 @@ function formatDateTime(dateStr: string): string {
   });
 }
 
+function AmountBadge({ tier, monto }: { tier: TierInfo; monto: string }) {
+  const label = tier.amountEmoji ? `${tier.amountEmoji} ${monto}` : monto;
+
+  if (tier.level === 0) {
+    return (
+      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent">
+        {monto}
+      </span>
+    );
+  }
+
+  // Tiers with gradient text (inner span needed)
+  if (tier.amountInnerClass) {
+    return (
+      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${tier.amountOuterClass}`}>
+        <span className={tier.amountInnerClass}>{label}</span>
+      </span>
+    );
+  }
+
+  return (
+    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${tier.amountOuterClass}`}>
+      {label}
+    </span>
+  );
+}
+
+function TierNameBadge({ tier }: { tier: TierInfo }) {
+  if (!tier.name || !tier.nameBadgeClass) return null;
+  return <span className={tier.nameBadgeClass}>{tier.name}</span>;
+}
+
 export default function ProclamaCard({
   proclama,
   isNew = false,
@@ -55,6 +97,7 @@ export default function ProclamaCard({
 }) {
   const { tr } = useLanguage();
   const [threadOpen, setThreadOpen] = useState(false);
+  const tier = getTier(proclama.monto);
 
   const monto = (proclama.monto / 100).toLocaleString("en-US", {
     style: "currency",
@@ -64,45 +107,78 @@ export default function ProclamaCard({
 
   const fecha = formatDateTime(proclama.created_at);
 
+  const isHighTier = tier.level >= 4;
+  const hoverClass = isHighTier ? "" : "hover:bg-surface";
+
   return (
     <article
-      className={`px-4 py-4 border-b border-line hover:bg-surface transition-colors cursor-default ${
+      className={`px-4 py-4 border-b border-line transition-colors cursor-default ${hoverClass} ${
         isNew ? "card-enter" : ""
-      }`}
+      } ${tier.cardClass}`}
     >
+      {/* Tier 7 exclusive header banner */}
+      {tier.level === 7 && (
+        <div className="tier-7-header">👑 Official Owner of Proclama 👑</div>
+      )}
+
       <div className="flex gap-3">
         {/* Avatar */}
         <div className="shrink-0 mt-0.5">
-          <Avatar name={proclama.autor} />
+          <Avatar
+            name={proclama.autor}
+            size={tier.level === 7 ? "xl" : "md"}
+            className={tier.avatarClass}
+          />
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Header row */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
+            {/* Author prefix emoji */}
+            {tier.authorPrefix && (
+              <span className="text-sm leading-none">{tier.authorPrefix}</span>
+            )}
+
+            {/* Author name */}
             {proclama.user_id ? (
               <Link
                 href={`/u/${encodeURIComponent(proclama.autor)}`}
-                className="text-foreground font-bold text-sm leading-none hover:text-accent transition-colors"
+                className={`font-bold text-sm leading-none hover:text-accent transition-colors ${
+                  tier.level === 7 ? "tier-7-author text-yellow-400" : "text-foreground"
+                }`}
               >
                 {proclama.autor}
               </Link>
             ) : (
-              <span className="text-foreground font-bold text-sm leading-none">
+              <span
+                className={`font-bold text-sm leading-none ${
+                  tier.level === 7 ? "tier-7-author text-yellow-400" : "text-foreground"
+                }`}
+              >
                 {proclama.autor}
               </span>
             )}
+
+            {/* Tier name badge */}
+            <TierNameBadge tier={tier} />
+
             <span className="text-muted text-xs">{fecha}</span>
+
             <div className="ml-auto flex items-center gap-1.5">
-              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent">
-                {monto}
-              </span>
+              <AmountBadge tier={tier} monto={monto} />
             </div>
           </div>
 
           {/* Texto */}
           <Link href={`/p/${proclama.id}`} className="block group">
-            <p className="text-foreground text-[18px] leading-relaxed font-medium group-hover:text-accent transition-colors">
+            <p
+              className={`leading-relaxed font-medium group-hover:text-accent transition-colors ${
+                tier.level === 7
+                  ? "tier-7-text"
+                  : "text-foreground text-[18px]"
+              }`}
+            >
               &ldquo;{proclama.texto}&rdquo;
             </p>
           </Link>

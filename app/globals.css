@@ -48,3 +48,382 @@ body {
 .card-enter {
   animation: card-enter 0.3s ease-out forwards;
 }
+
+/* ============================================================
+   TIER SYSTEM ANIMATIONS
+   ============================================================ */
+@keyframes tier-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+@keyframes tier-gradient-flow {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+@keyframes tier-sparkle {
+  0%, 100% { opacity: 0.8; transform: scale(1)   rotate(0deg);  }
+  50%       { opacity: 0.2; transform: scale(0.5) rotate(45deg); }
+}
+@keyframes tier-rainbow-hue {
+  from { filter: hue-rotate(0deg);   }
+  to   { filter: hue-rotate(360deg); }
+}
+@keyframes tier-rainbow-pulse {
+  0%, 100% { box-shadow: 0 0 18px rgba(255, 60, 60, 0.4),  0 0 36px rgba(60, 60, 255, 0.2);  }
+  33%       { box-shadow: 0 0 18px rgba(60, 200, 60, 0.4),  0 0 36px rgba(200, 60, 200, 0.2); }
+  66%       { box-shadow: 0 0 18px rgba(60, 100, 255, 0.4), 0 0 36px rgba(255, 160, 0, 0.2);  }
+}
+@keyframes tier-halo {
+  0%, 100% {
+    box-shadow:
+      0 0 25px rgba(255,215,0,0.5),
+      0 0 50px rgba(255,215,0,0.3),
+      0 0 80px rgba(255,215,0,0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 40px rgba(255,215,0,0.8),
+      0 0 70px rgba(255,215,0,0.5),
+      0 0 110px rgba(255,215,0,0.25);
+  }
+}
+@keyframes tier-gold-pulse {
+  0%, 100% { color: #FFD700; }
+  50%       { color: #FFF8B0; }
+}
+@keyframes tier-shimmer-border {
+  0%   { transform: translateY(-150%); }
+  100% { transform: translateY(250%);  }
+}
+
+/* ============================================================
+   TIER 1 — CONFORMIST  ($5–$9)
+   ============================================================ */
+.tier-1-card {
+  border-left: 2px solid #444 !important;
+}
+.tier-1-name-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 600;
+  background: #2a2a2a;
+  color: #888;
+  border: 1px solid #444;
+  letter-spacing: 0.2px;
+}
+.tier-1-amount-outer {
+  background: rgba(80, 80, 80, 0.18) !important;
+  color: #888 !important;
+  border: 1px solid rgba(80, 80, 80, 0.3) !important;
+}
+
+/* ============================================================
+   TIER 2 — JUST A TIP  ($10–$29)
+   ============================================================ */
+.tier-2-card {
+  border-left: 2px solid rgba(59, 130, 246, 0.65) !important;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+.tier-2-name-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.15);
+  color: #93C5FD;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.2);
+}
+.tier-2-amount-outer {
+  background: rgba(59, 130, 246, 0.12) !important;
+  color: #60A5FA !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  font-weight: 700 !important;
+}
+
+/* ============================================================
+   TIER 3 — CENTURION  ($30–$99)
+   ============================================================ */
+.tier-3-card {
+  position: relative;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+/* Gradient border via mask technique */
+.tier-3-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  background: linear-gradient(135deg, #10B981, #3B82F6, #10B981);
+  background-size: 200% 200%;
+  animation: tier-gradient-flow 3s ease infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+}
+.tier-3-name-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #10B981, #3B82F6);
+  color: #fff;
+}
+.tier-3-amount-outer {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+.tier-3-amount-inner {
+  background: linear-gradient(135deg, #10B981, #3B82F6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* ============================================================
+   TIER 4 — MILLIONAIRE  ($100–$999)
+   ============================================================ */
+.tier-4-card {
+  border: 1.5px solid #F59E0B !important;
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+  margin: 2px 0;
+}
+.dark .tier-4-card {
+  background: linear-gradient(135deg, #1a1500 0%, #111111 100%) !important;
+}
+.dark .tier-4-card:hover {
+  background: linear-gradient(135deg, #211b00 0%, #181818 100%) !important;
+}
+.tier-4-name-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #000;
+}
+.tier-4-amount-outer {
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #F59E0B !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  font-weight: 700 !important;
+}
+
+/* ============================================================
+   TIER 5 — BILLIONAIRE  ($1,000–$99,999)
+   ============================================================ */
+.tier-5-card {
+  position: relative;
+  border: 1.5px solid rgba(192, 192, 192, 0.5) !important;
+  box-shadow: 0 0 40px rgba(192, 192, 192, 0.45);
+  overflow: hidden;
+  margin: 2px 0;
+}
+.dark .tier-5-card {
+  background: linear-gradient(135deg, #0d0d1a 0%, #111111 100%) !important;
+}
+.dark .tier-5-card:hover {
+  background: linear-gradient(135deg, #131325 0%, #181818 100%) !important;
+}
+/* Shimmer sweep across the left border */
+.tier-5-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -50%;
+  height: 200%;
+  width: 3px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #E8E8E8 35%,
+    #ffffff 50%,
+    #E8E8E8 65%,
+    transparent 100%
+  );
+  animation: tier-shimmer-border 2s ease-in-out infinite;
+  pointer-events: none;
+}
+/* Corner sparkle */
+.tier-5-card::after {
+  content: '✦';
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 11px;
+  color: #C0C0C0;
+  animation: tier-sparkle 2.5s ease infinite;
+  pointer-events: none;
+}
+.tier-5-name-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #A8A8A8, #E8E8E8, #C0C0C0, #E8E8E8, #A8A8A8);
+  background-size: 300% auto;
+  color: #111;
+  animation: tier-shimmer 2.5s linear infinite;
+}
+.tier-5-amount-outer {
+  background: rgba(192, 192, 192, 0.08) !important;
+  border: 1px solid rgba(192, 192, 192, 0.3) !important;
+}
+.tier-5-amount-inner {
+  background: linear-gradient(90deg, #A8A8A8, #E8E8E8, #C0C0C0, #E8E8E8, #A8A8A8);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  animation: tier-shimmer 2.5s linear infinite;
+}
+
+/* ============================================================
+   TIER 6 — TRILLIONAIRE  ($100,000–$999,999)
+   ============================================================ */
+.tier-6-card {
+  position: relative;
+  animation: tier-rainbow-pulse 3s ease infinite;
+  overflow: hidden;
+  margin: 2px 0;
+}
+/* Rainbow gradient border via mask */
+.tier-6-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    #ff0000, #ff7700, #ffff00, #00ff00,
+    #0088ff, #8b00ff, #ff0000
+  );
+  background-size: 300% 300%;
+  animation: tier-gradient-flow 2.5s linear infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+/* Floating rainbow sparkle */
+.tier-6-card::after {
+  content: '✦ ✦';
+  position: absolute;
+  top: 7px;
+  right: 10px;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #fff;
+  animation: tier-rainbow-hue 2s linear infinite;
+  pointer-events: none;
+}
+.tier-6-name-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #ff0000, #ff7700, #ffff00, #00ff00, #0088ff, #8b00ff, #ff0000);
+  background-size: 300% auto;
+  color: #fff;
+  animation: tier-shimmer 2s linear infinite;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+.tier-6-amount-outer {
+  background: rgba(255, 80, 0, 0.08) !important;
+  border: 1px solid rgba(255, 80, 0, 0.3) !important;
+}
+.tier-6-amount-inner {
+  background: linear-gradient(90deg, #ff4400, #ffcc00, #00ff88, #0088ff, #ff4400);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  animation: tier-shimmer 2s linear infinite;
+}
+.tier-6-avatar {
+  filter: drop-shadow(0 0 6px rgba(255, 100, 0, 0.6));
+  animation: tier-rainbow-hue 4s linear infinite;
+}
+
+/* ============================================================
+   TIER 7 — OFFICIAL OWNER  ($1,000,000+)
+   ============================================================ */
+.tier-7-card {
+  position: relative;
+  border: 2px solid #FFD700 !important;
+  animation: tier-halo 2s ease infinite;
+  margin: 6px 0;
+}
+.dark .tier-7-card {
+  background: #060606 !important;
+}
+.dark .tier-7-card:hover {
+  background: #0c0c0c !important;
+}
+.tier-7-header {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 0 0 10px 0;
+  background: linear-gradient(90deg, #B8860B, #FFD700, #FFF8DC, #FFD700, #B8860B);
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: tier-shimmer 3s linear infinite;
+  letter-spacing: 1px;
+}
+.tier-7-name-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #B8860B, #FFD700, #FFF8DC, #FFD700, #B8860B);
+  background-size: 250% auto;
+  color: #000;
+  animation: tier-shimmer 3s linear infinite;
+}
+.tier-7-amount-outer {
+  background: rgba(255, 215, 0, 0.12) !important;
+  color: #FFD700 !important;
+  border: 1px solid rgba(255, 215, 0, 0.45) !important;
+  font-weight: 800 !important;
+  animation: tier-gold-pulse 1.5s ease infinite;
+}
+.tier-7-avatar {
+  border: 2px solid #FFD700 !important;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.7), 0 0 32px rgba(255, 215, 0, 0.3) !important;
+}
+.tier-7-author {
+  animation: tier-gold-pulse 1.5s ease infinite;
+}
+.tier-7-text {
+  font-size: 20px !important;
+  line-height: 1.5 !important;
+  color: #ffffff !important;
+}
