@@ -9,6 +9,8 @@ import RightSidebar from "./RightSidebar";
 import UserMenu from "./UserMenu";
 import Link from "next/link";
 
+const HOME_URL = "https://proclama.vercel.app";
+
 type Props = {
   initialProclamaas: Proclama[];
   totalCount: number;
@@ -24,34 +26,13 @@ export default function HomeClient({
   const { tr } = useLanguage();
   const { user } = useAuth();
 
-  // Source of truth: all proclamas loaded from server
-  const [allProclamaas, setAllProclamaas] = useState<Proclama[]>(initialProclamaas);
-  // Displayed proclamas: filtered subset of allProclamaas
   const [proclamas, setProclamaas] = useState<Proclama[]>(initialProclamaas);
-
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(2);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
 
   const sentinelRef = useRef<HTMLDivElement>(null);
-
-  // Client-side filter: never fetch due to search
-  useEffect(() => {
-    if (!search.trim()) {
-      setProclamaas(allProclamaas);
-      return;
-    }
-    const q = search.toLowerCase();
-    setProclamaas(
-      allProclamaas.filter(
-        (p) =>
-          p.texto?.toLowerCase().includes(q) ||
-          p.autor?.toLowerCase().includes(q)
-      )
-    );
-  }, [search, allProclamaas]);
 
   const fetchPage = useCallback(async (p: number, reset = false) => {
     setLoading(true);
@@ -63,12 +44,12 @@ export default function HomeClient({
       const newProclamaas: Proclama[] = data.proclamas ?? [];
 
       if (reset) {
-        setAllProclamaas(newProclamaas);
+        setProclamaas(newProclamaas);
         setNewIds(new Set());
       } else {
         const ids = new Set(newProclamaas.map((p: Proclama) => p.id));
         setNewIds(ids);
-        setAllProclamaas((prev) => [...prev, ...newProclamaas]);
+        setProclamaas((prev) => [...prev, ...newProclamaas]);
         setTimeout(() => setNewIds(new Set()), 600);
       }
 
@@ -95,24 +76,17 @@ export default function HomeClient({
     return () => observer.disconnect();
   }, [hasMore, loading, page, fetchPage]);
 
-  const resetFeed = useCallback(async () => {
-    setSearch("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    setPage(1);
-    await fetchPage(1, true);
-  }, [fetchPage]);
-
   return (
     <div className="min-h-screen bg-bg">
       {/* Mobile header */}
       <header className="md:hidden sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-line">
         <div className="px-4 py-3 flex items-center justify-between gap-3">
-          <button
-            onClick={resetFeed}
+          <a
+            href={HOME_URL}
             className="text-xl font-extrabold text-foreground hover:opacity-75 transition-opacity"
           >
             Proclama<span className="text-accent">.</span>
-          </button>
+          </a>
           <div className="flex items-center gap-2 shrink-0">
             <UserMenu />
             <Link
@@ -123,15 +97,14 @@ export default function HomeClient({
             </Link>
           </div>
         </div>
-        {/* Mobile search */}
+        {/* Mobile Home button */}
         <div className="px-4 pb-3">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={tr("searchPlaceholder")}
-            className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-sm text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent"
-          />
+          <button
+            onClick={() => { window.location.href = HOME_URL; }}
+            className="w-full bg-accent text-white font-bold px-4 py-2.5 rounded-xl hover:bg-blue-500 transition-colors text-sm text-center"
+          >
+            🏠 Home
+          </button>
         </div>
       </header>
 
@@ -140,11 +113,7 @@ export default function HomeClient({
         {/* Left sidebar — desktop only */}
         <aside className="hidden md:block w-[240px] shrink-0">
           <div className="sticky top-0 max-h-screen overflow-y-auto">
-            <LeftSidebar
-              search={search}
-              onSearchChange={setSearch}
-              onReset={resetFeed}
-            />
+            <LeftSidebar />
           </div>
         </aside>
 
@@ -155,16 +124,14 @@ export default function HomeClient({
               <div className="text-center py-28 px-4">
                 <p className="text-5xl mb-5">📣</p>
                 <h2 className="text-2xl font-bold text-foreground mb-2">
-                  {search ? tr("noResults") : tr("muroEmpty")}
+                  {tr("muroEmpty")}
                 </h2>
-                {!search && (
-                  <Link
-                    href="/nueva"
-                    className="mt-6 inline-block bg-accent text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-500 transition-colors"
-                  >
-                    {tr("muroEmptyBtn")}
-                  </Link>
-                )}
+                <Link
+                  href="/nueva"
+                  className="mt-6 inline-block bg-accent text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-500 transition-colors"
+                >
+                  {tr("muroEmptyBtn")}
+                </Link>
               </div>
             ) : (
               <>

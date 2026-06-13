@@ -7,13 +7,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import UserMenu from "./UserMenu";
 
-type Props = {
-  search: string;
-  onSearchChange: (q: string) => void;
-  onReset?: () => void;
-};
+const HOME_URL = "https://proclama.vercel.app";
 
-export default function LeftSidebar({ search, onSearchChange, onReset }: Props) {
+export default function LeftSidebar() {
   const { tr, toggleTheme, theme } = useLanguage();
   const { user } = useAuth();
   const [nebulosas, setNebulosas] = useState<number | null>(null);
@@ -42,12 +38,12 @@ export default function LeftSidebar({ search, onSearchChange, onReset }: Props) 
       {/* Logo + UserMenu */}
       <div className="px-3 mb-1 flex items-start justify-between gap-2">
         <div>
-          <button
-            onClick={onReset}
-            className="text-2xl font-extrabold text-foreground tracking-tight hover:opacity-75 transition-opacity text-left"
+          <a
+            href={HOME_URL}
+            className="text-2xl font-extrabold text-foreground tracking-tight hover:opacity-75 transition-opacity"
           >
             Proclama<span className="text-accent">.</span>
-          </button>
+          </a>
           <p className="text-muted text-xs mt-0.5">{tr("tagline")}</p>
         </div>
         <div className="pt-0.5">
@@ -55,21 +51,20 @@ export default function LeftSidebar({ search, onSearchChange, onReset }: Props) 
         </div>
       </div>
 
-      {/* Home button */}
-      <button
-        onClick={onReset}
-        className="mx-3 flex items-center gap-1.5 text-xs text-muted hover:text-foreground transition-colors py-1"
-      >
-        <span>🏠</span>
-        <span>Home</span>
-      </button>
-
       {/* Publish button */}
       <button
         onClick={handlePublish}
         className="mx-3 bg-accent text-white font-bold px-4 py-2.5 rounded-xl hover:bg-blue-500 transition-colors text-sm text-center"
       >
         {tr("publishBtn")}
+      </button>
+
+      {/* Home button — same style as Publish */}
+      <button
+        onClick={() => { window.location.href = HOME_URL; }}
+        className="mx-3 bg-accent text-white font-bold px-4 py-2.5 rounded-xl hover:bg-blue-500 transition-colors text-sm text-center"
+      >
+        🏠 Home
       </button>
 
       {/* Wallet link — only when logged in */}
@@ -82,17 +77,6 @@ export default function LeftSidebar({ search, onSearchChange, onReset }: Props) 
           <span>{nebulosas.toLocaleString()} nebulas</span>
         </Link>
       )}
-
-      {/* Search */}
-      <div className="px-3 mt-2">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={tr("searchPlaceholder")}
-          className="w-full bg-surface border border-line rounded-xl px-3 py-2 text-sm text-foreground placeholder-muted focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
-        />
-      </div>
 
       {/* Theme toggle */}
       <div className="mt-4 mx-3 border-t border-line pt-4">
