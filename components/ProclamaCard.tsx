@@ -48,7 +48,10 @@ function AnimalEmoji({
 }
 
 function stripEmojis(s: string): string {
-  return s.replace(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu, "").trim();
+  return s
+    .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, "")
+    .replace(/[☀-➿⌀-⏿⬀-⯿︀-️]/g, "")
+    .trim();
 }
 
 function formatDateTime(dateStr: string): string {
