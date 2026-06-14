@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import ProclamaCard, { type Proclama } from "./ProclamaCard";
@@ -10,53 +10,63 @@ import UserMenu from "./UserMenu";
 import Link from "next/link";
 
 const HOME_URL = "https://proclama.vercel.app";
+const LIMIT = 40;
 
-type Props = {
-  initialProclamaas: Proclama[];
-  totalCount: number;
-  hasMore: boolean;
-  totalReacciones?: number;
-};
-
-export default function HomeClient({
-  initialProclamaas,
-  totalCount,
-  hasMore: initialHasMore,
-}: Props) {
+export default function HomeClient() {
   const { tr } = useLanguage();
   const { user } = useAuth();
 
-  const [proclamas, setProclamaas] = useState<Proclama[]>(initialProclamaas);
+  const [proclamas, setProclamaas] = useState<Proclama[]>([]);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
-  const [page, setPage] = useState(2);
-  const [hasMore, setHasMore] = useState(initialHasMore);
-  const [loading, setLoading] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
+  const fetching = useRef(false);
 
-  const fetchPage = useCallback(async (p: number, reset = false) => {
+  const fetchPage = useCallback(async (currentOffset: number, append: boolean) => {
+    if (fetching.current) return;
+    fetching.current = true;
     setLoading(true);
-    const params = new URLSearchParams({ page: String(p), limit: "40" });
 
     try {
+      const params = new URLSearchParams({
+        offset: String(currentOffset),
+        limit: String(LIMIT),
+      });
       const res = await fetch(`/api/proclamas?${params}`);
+      if (!res.ok) {
+        console.error("[HomeClient] fetch error:", res.status, await res.text());
+        return;
+      }
       const data = await res.json();
-      const newProclamaas: Proclama[] = data.proclamas ?? [];
+      const incoming: Proclama[] = data.proclamas ?? [];
 
-      if (reset) {
-        setProclamaas(newProclamaas);
-        setNewIds(new Set());
-      } else {
-        const ids = new Set(newProclamaas.map((p: Proclama) => p.id));
+      if (append) {
+        const ids = new Set(incoming.map((p) => p.id));
         setNewIds(ids);
-        setProclamaas((prev) => [...prev, ...newProclamaas]);
+        setProclamaas((prev) => [...prev, ...incoming]);
         setTimeout(() => setNewIds(new Set()), 600);
+      } else {
+        setProclamaas(incoming);
+        setNewIds(new Set());
       }
 
-      setPage(p + 1);
+      setTotalCount(data.total ?? 0);
       setHasMore(data.hasMore ?? false);
+      setOffset(currentOffset + incoming.length);
+    } catch (err) {
+      console.error("[HomeClient] unexpected error:", err);
     } finally {
       setLoading(false);
+      fetching.current = false;
     }
   }, []);
+
+  // Initial load on mount
+  useEffect(() => {
+    fetchPage(0, false);
+  }, [fetchPage]);
 
   // Infinite scroll — trigger at 80% of page scroll
   useEffect(() => {
@@ -64,12 +74,14 @@ export default function HomeClient({
       const scrolled = window.scrollY + window.innerHeight;
       const total = document.documentElement.scrollHeight;
       if (total > 0 && scrolled / total >= 0.8 && hasMore && !loading) {
-        fetchPage(page);
+        fetchPage(offset, true);
       }
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasMore, loading, page, fetchPage]);
+  }, [hasMore, loading, offset, fetchPage]);
+
+  const isEmpty = !loading && proclamas.length === 0;
 
   return (
     <div className="min-h-screen bg-bg">
@@ -92,7 +104,6 @@ export default function HomeClient({
             </Link>
           </div>
         </div>
-        {/* Mobile Home button */}
         <div className="px-4 pb-3">
           <button
             onClick={() => { window.location.href = HOME_URL; }}
@@ -115,7 +126,15 @@ export default function HomeClient({
         {/* Center feed */}
         <main className="flex-1 min-w-0 max-w-[600px] border-x border-line">
           <div className="px-3 py-4">
-            {proclamas.length === 0 && !loading ? (
+            {/* Initial loading spinner */}
+            {loading && proclamas.length === 0 && (
+              <div className="flex justify-center py-28">
+                <div className="w-8 h-8 border-2 border-line border-t-accent rounded-full animate-spin" />
+              </div>
+            )}
+
+            {/* Empty state — only shown after load completes with 0 results */}
+            {isEmpty && (
               <div className="text-center py-28 px-4">
                 <p className="text-5xl mb-5">📣</p>
                 <h2 className="text-2xl font-bold text-foreground mb-2">
@@ -128,7 +147,10 @@ export default function HomeClient({
                   {tr("muroEmptyBtn")}
                 </Link>
               </div>
-            ) : (
+            )}
+
+            {/* Feed */}
+            {proclamas.length > 0 && (
               <>
                 {proclamas.map((p) => (
                   <ProclamaCard
@@ -144,7 +166,7 @@ export default function HomeClient({
                   </div>
                 )}
 
-                {!hasMore && proclamas.length > 0 && (
+                {!hasMore && (
                   <p className="text-center text-muted text-sm py-10">
                     You&apos;ve seen everything
                   </p>
