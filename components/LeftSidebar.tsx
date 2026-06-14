@@ -43,7 +43,7 @@ const FRASES = [
 ];
 
 export default function LeftSidebar() {
-  const { tr, toggleTheme, theme } = useLanguage();
+  const { tr } = useLanguage();
   const { user } = useAuth();
   const [nebulosas, setNebulosas] = useState<number | null>(null);
 
@@ -112,19 +112,9 @@ export default function LeftSidebar() {
         </Link>
       )}
 
-      {/* Theme toggle */}
+      {/* Daily phrase */}
       <div className="mt-4 mx-3 border-t border-line pt-4">
-        <button
-          onClick={toggleTheme}
-          className={`w-full text-xs font-bold py-1.5 rounded-lg transition-colors border ${
-            theme === "dark"
-              ? "bg-white text-black border-white hover:bg-gray-100"
-              : "bg-black text-white border-black hover:bg-gray-900"
-          }`}
-        >
-          {theme === "dark" ? "Dark" : "Light"}
-        </button>
-        <p className="text-center text-xs italic mt-3 px-1 leading-snug" style={{ color: "#6B7280" }}>
+        <p className="text-center text-xs italic px-1 leading-snug" style={{ color: "#6B7280" }}>
           {fraseDelDia}
         </p>
       </div>

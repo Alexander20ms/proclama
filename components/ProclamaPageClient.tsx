@@ -76,7 +76,7 @@ export default function ProclamaPageClient({
   proclama: Proclama;
   initialRespuestas: Respuesta[];
 }) {
-  const { tr, toggleTheme, theme } = useLanguage();
+  const { tr } = useLanguage();
   const [successMsg, setSuccessMsg] = useState(false);
   const tier = getTier(proclama.monto);
 
@@ -115,12 +115,6 @@ export default function ProclamaPageClient({
             Proclama<span className="text-accent">.</span>
           </Link>
           <div className="flex items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              className="text-muted hover:text-foreground text-base border border-line px-2.5 py-1.5 rounded-lg transition-colors"
-            >
-              {theme === "dark" ? "☀️" : "🌙"}
-            </button>
             <Link href="/" className="text-muted hover:text-foreground text-sm transition-colors">
               {tr("backToWall")}
             </Link>

@@ -5,9 +5,6 @@ export const translations = {
     searchPlaceholder: "Search",
     login: "Login",
     logout: "Logout",
-    lightMode: "Light",
-    darkMode: "Dark",
-
     highestAmount: "Highest amount",
     sortMonto: "Highest amount",
     mostReactions: "Most reactions",

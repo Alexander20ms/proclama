@@ -2,18 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Light mode (default) */
 :root {
-  --color-bg: #F9FAFB;
-  --color-surface: #FFFFFF;
-  --color-hover: #F3F4F6;
-  --color-line: #E5E7EB;
-  --color-muted: #6B7280;
-  --color-foreground: #111111;
-}
-
-/* Dark mode */
-.dark {
   --color-bg: #0A0A0A;
   --color-surface: #111111;
   --color-hover: #2A2A2A;

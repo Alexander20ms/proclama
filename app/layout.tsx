@@ -18,15 +18,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <head>
-        {/* Apply saved theme before first paint — prevents flash */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{const t=localStorage.getItem('proclama_theme')??"dark";if(t==="light")document.documentElement.classList.remove("dark");else document.documentElement.classList.add("dark");}catch(e){}`,
-          }}
-        />
-      </head>
+    <html lang="en">
       <body className={`${inter.variable} font-sans min-h-screen antialiased`}>
         <AuthProvider>
           <LanguageProvider>{children}</LanguageProvider>
