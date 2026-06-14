@@ -5,17 +5,17 @@ import ProclamaPageClient from "@/components/ProclamaPageClient";
 import type { Proclama } from "@/components/ProclamaCard";
 import type { Respuesta } from "@/components/RespuestaThread";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 async function getProclama(id: string): Promise<Proclama | null> {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from("proclamas")
-    .select(
-      "id, texto, autor, monto, nebulosas, categoria, reacciones, created_at, apoyos, monto_total, user_id, autor_animal"
-    )
+    .select("*")
     .eq("id", id)
     .eq("publicada", true)
     .single();
@@ -23,9 +23,9 @@ async function getProclama(id: string): Promise<Proclama | null> {
 }
 
 async function getRespuestas(proclamaId: string): Promise<Respuesta[]> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("respuestas")
-    .select("id, texto, autor, monto, created_at")
+    .select("*")
     .eq("proclama_id", proclamaId)
     .eq("publicada", true)
     .order("created_at", { ascending: true });
